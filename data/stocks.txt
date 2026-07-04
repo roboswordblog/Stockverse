@@ -1,0 +1,1 @@
+Company,User,StartingPrice,day,week,month
