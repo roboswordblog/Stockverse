@@ -7,13 +7,13 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/index.css') }}">
 </head>
 <body>
-<div id="index">
+<div id="index" class="view-section">
     <header class="site-header">
         <div class="brand-wrap">
             <h1>Stockverse</h1>
             <p>Practice investing with live market data and zero risk.</p>
         </div>
-        <a class="header-cta" href="#market-overview">Start Simulating</a>
+        <a class="header-cta section-link" href="#" data-section="market">See Market</a>
     </header>
 
     <main>
@@ -24,12 +24,13 @@
                 Test strategies, watch positions update live, and learn how market behavior impacts your returns.
             </p>
             <div class="hero-actions">
-                <button type="button" class="primary-btn">Launch Dashboard</button>
-                <button type="button" class="secondary-btn">Explore Markets</button>
+                <a class="primary-btn section-link" href="#" data-section="market">See Market</a>
+                <a class="secondary-btn section-link" href="#" data-section="signup">Sign Up</a>
+                <a class="secondary-btn section-link" href="#" data-section="login">Log In</a>
             </div>
         </section>
 
-        <section id="market-overview" class="overview-grid">
+        <section class="overview-grid">
             <article class="overview-card">
                 <h3>Live Tracking</h3>
                 <p>Follow real-time prices from major exchanges and monitor movement as it happens.</p>
@@ -49,14 +50,40 @@
         </section>
     </main>
 </div>
-<div id="signup" hidden>
+<div id="signup" class="view-section is-hidden">
 
 </div>
-<div id="login" hidden>
+<div id="login" class="view-section is-hidden">
+
+</div>
+<div id="market" class="view-section is-hidden">
 
 </div>
 <script>
+    function showSection(sectionId) {
+        const sectionIds = ['index', 'signup', 'login', 'market'];
+        sectionIds.forEach((id) => {
+            const section = document.getElementById(id);
+            if (!section) {
+                return;
+            }
+            if (id === sectionId) {
+                section.classList.remove('is-hidden');
+            } else {
+                section.classList.add('is-hidden');
+            }
+        });
+    }
 
+    document.querySelectorAll('.section-link').forEach((link) => {
+        link.addEventListener('click', (event) => {
+            event.preventDefault();
+            const target = link.dataset.section;
+            if (target) {
+                showSection(target);
+            }
+        });
+    });
 </script>
 </body>
 </html>
