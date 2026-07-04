@@ -2,16 +2,57 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stockverse</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/index.css') }}">
 </head>
 <body>
 <div id="index">
+    <header class="site-header">
+        <div class="brand-wrap">
+            <h1>Stockverse</h1>
+            <p>Practice investing with live market data and zero risk.</p>
+        </div>
+        <a class="header-cta" href="#market-overview">Start Simulating</a>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h2>Trade Smarter Before You Trade Real</h2>
+            <p>
+                Build confidence by managing a virtual portfolio powered by real-time stock movement.
+                Test strategies, watch positions update live, and learn how market behavior impacts your returns.
+            </p>
+            <div class="hero-actions">
+                <button type="button" class="primary-btn">Launch Dashboard</button>
+                <button type="button" class="secondary-btn">Explore Markets</button>
+            </div>
+        </section>
+
+        <section id="market-overview" class="overview-grid">
+            <article class="overview-card">
+                <h3>Live Tracking</h3>
+                <p>Follow real-time prices from major exchanges and monitor movement as it happens.</p>
+            </article>
+            <article class="overview-card">
+                <h3>Virtual Cash</h3>
+                <p>Start with fake funds, execute orders, and measure risk with no real-world downside.</p>
+            </article>
+            <article class="overview-card">
+                <h3>Performance Analytics</h3>
+                <p>See gains, losses, and allocation breakdowns to understand what drives outcomes.</p>
+            </article>
+            <article class="overview-card">
+                <h3>Strategy Testing</h3>
+                <p>Experiment with long-term and short-term ideas before making real financial decisions.</p>
+            </article>
+        </section>
+    </main>
+</div>
+<div id="signup" hidden>
 
 </div>
-<div id="signup">
-
-</div>
-<div id="login">
+<div id="login" hidden>
 
 </div>
 <script>

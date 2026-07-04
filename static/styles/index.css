@@ -1,0 +1,121 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    background: #f4f7fb;
+    color: #172033;
+}
+
+#index {
+    min-height: 100vh;
+    padding: 32px clamp(18px, 4vw, 56px) 48px;
+}
+
+.site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+}
+
+.brand-wrap h1 {
+    margin: 0;
+    font-size: clamp(1.5rem, 2.4vw, 2rem);
+    color: #0f1b33;
+}
+
+.brand-wrap p {
+    margin: 8px 0 0;
+    color: #4b5877;
+    max-width: 620px;
+}
+
+.header-cta {
+    text-decoration: none;
+    background: #2266f5;
+    color: #ffffff;
+    padding: 11px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.hero {
+    background: #ffffff;
+    border: 1px solid #dde5f4;
+    border-radius: 8px;
+    padding: clamp(20px, 3vw, 34px);
+}
+
+.hero h2 {
+    margin: 0;
+    font-size: clamp(1.4rem, 3vw, 2rem);
+}
+
+.hero p {
+    margin: 14px 0 0;
+    line-height: 1.55;
+    color: #3d4a67;
+    max-width: 820px;
+}
+
+.hero-actions {
+    margin-top: 22px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.primary-btn,
+.secondary-btn {
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 11px 15px;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.primary-btn {
+    background: #152a52;
+    color: #ffffff;
+}
+
+.secondary-btn {
+    background: #ffffff;
+    color: #152a52;
+    border-color: #c5d1e9;
+}
+
+.overview-grid {
+    margin-top: 22px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+}
+
+.overview-card {
+    background: #ffffff;
+    border: 1px solid #dde5f4;
+    border-radius: 8px;
+    padding: 18px;
+}
+
+.overview-card h3 {
+    margin: 0;
+    font-size: 1.05rem;
+}
+
+.overview-card p {
+    margin: 10px 0 0;
+    color: #4b5877;
+    line-height: 1.5;
+}
+
+#signup,
+#login {
+    display: none !important;
+}
