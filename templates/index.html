@@ -123,7 +123,22 @@
     </main>
 </div>
 <div id="signup" class="view-section is-hidden">
+    <section class="auth-shell">
+        <h2>Create Your Trading Account</h2>
+        <p>Claim your username, set a password, and start with 1000 USD in virtual funds.</p>
+        <form id="signupForm" class="auth-form" novalidate>
+            <label for="signupUsername">Username</label>
+            <input id="signupUsername" name="username" type="text" minlength="3" maxlength="30" autocomplete="username" required>
+            <p id="signupUsernameError" class="form-error is-hidden"></p>
 
+            <label for="signupPassword">Password</label>
+            <input id="signupPassword" name="password" type="password" minlength="6" maxlength="128" autocomplete="new-password" required>
+            <p id="signupPasswordError" class="form-error is-hidden"></p>
+
+            <button id="signupSubmit" type="submit" class="primary-btn">Create Account</button>
+            <p id="signupSubmitError" class="form-error is-hidden"></p>
+        </form>
+    </section>
 </div>
 <div id="login" class="view-section is-hidden">
 
@@ -217,6 +232,109 @@
 
     drawMarketChart();
     window.addEventListener('resize', drawMarketChart);
+
+    const signupForm = document.getElementById('signupForm');
+    const signupUsername = document.getElementById('signupUsername');
+    const signupPassword = document.getElementById('signupPassword');
+    const signupSubmit = document.getElementById('signupSubmit');
+    const signupUsernameError = document.getElementById('signupUsernameError');
+    const signupPasswordError = document.getElementById('signupPasswordError');
+    const signupSubmitError = document.getElementById('signupSubmitError');
+    let usernamePoller = null;
+
+    function setMessage(element, message) {
+        if (!element) {
+            return;
+        }
+        if (message) {
+            element.textContent = message;
+            element.classList.remove('is-hidden');
+        } else {
+            element.textContent = '';
+            element.classList.add('is-hidden');
+        }
+    }
+
+    async function checkUsernameAvailability() {
+        if (!signupUsername) {
+            return;
+        }
+
+        const username = signupUsername.value.trim();
+        if (username.length < 3) {
+            setMessage(signupUsernameError, '');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/usernameThere?username=${encodeURIComponent(username)}`);
+            if (!response.ok) {
+                return;
+            }
+            const data = await response.json();
+            if (data.exists) {
+                setMessage(signupUsernameError, 'That username is already taken.');
+            } else {
+                setMessage(signupUsernameError, '');
+            }
+        } catch (error) {
+            setMessage(signupUsernameError, 'Username check failed.');
+        }
+    }
+
+    function startUsernamePolling() {
+        if (usernamePoller) {
+            clearInterval(usernamePoller);
+        }
+        usernamePoller = setInterval(checkUsernameAvailability, 700);
+    }
+
+    startUsernamePolling();
+
+    if (signupForm) {
+        signupForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            setMessage(signupPasswordError, '');
+            setMessage(signupSubmitError, '');
+
+            const username = signupUsername.value.trim();
+            const password = signupPassword.value.trim();
+
+            if (username.length < 3) {
+                setMessage(signupUsernameError, 'Username must be at least 3 characters.');
+                return;
+            }
+            if (password.length < 6) {
+                setMessage(signupPasswordError, 'Password must be at least 6 characters.');
+                return;
+            }
+            if (!signupUsernameError.classList.contains('is-hidden')) {
+                return;
+            }
+
+            signupSubmit.disabled = true;
+            signupSubmit.textContent = 'Creating...';
+
+            try {
+                const response = await fetch('/signup', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username, password})
+                });
+                const data = await response.json();
+                if (!response.ok || !data.ok) {
+                    setMessage(signupSubmitError, data.error || 'Could not create account.');
+                    return;
+                }
+                window.location.href = '/home.html';
+            } catch (error) {
+                setMessage(signupSubmitError, 'Network error while creating account.');
+            } finally {
+                signupSubmit.disabled = false;
+                signupSubmit.textContent = 'Create Account';
+            }
+        });
+    }
 </script>
 </body>
 </html>
