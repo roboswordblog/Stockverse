@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, render_template, request
 from database import create_user_database, login_user, signup_user, username_exists
+from dataCollection import get_top_100_stocks
 
 app = Flask(__name__)
 create_user_database()
@@ -55,7 +56,7 @@ def home():
 
 @app.route('/getAllPrices')
 def getAllPrices():
-    pass
+    return jsonify({'stocks': get_top_100_stocks()})
 
 if __name__ == '__main__':
     app.run(debug=True)

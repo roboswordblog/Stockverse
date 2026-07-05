@@ -175,7 +175,44 @@
     </section>
 </div>
 <div id="market" class="view-section is-hidden">
-
+    <section class="market-shell">
+        <div class="market-toolbar">
+            <div>
+                <h2>Market Board</h2>
+                <p>Track leading names, scan momentum, and move into your simulator with current pricing.</p>
+            </div>
+            <div class="market-actions">
+                <a class="ghost-btn section-link" href="#" data-section="index">Back Home</a>
+                <a class="ghost-btn section-link" href="#" data-section="signup">Sign Up</a>
+                <a class="primary-btn section-link" href="#" data-section="login">Log In</a>
+            </div>
+        </div>
+        <div class="market-summary">
+            <article class="summary-card">
+                <span class="summary-label">Coverage</span>
+                <strong id="marketCount">100 Stocks</strong>
+            </article>
+            <article class="summary-card">
+                <span class="summary-label">Session</span>
+                <strong>Real-Time Quotes</strong>
+            </article>
+            <article class="summary-card">
+                <span class="summary-label">Mode</span>
+                <strong>Practice Trading</strong>
+            </article>
+        </div>
+        <div class="market-board">
+            <div class="market-board-head">
+                <span>Symbol</span>
+                <span>Price</span>
+                <span>Change</span>
+                <span>%</span>
+            </div>
+            <div id="marketList" class="market-list">
+                <div class="market-empty">Loading market data...</div>
+            </div>
+        </div>
+    </section>
 </div>
 <script>
     function showSection(sectionId) {
@@ -191,6 +228,10 @@
                 section.classList.add('is-hidden');
             }
         });
+
+        if (sectionId === 'market') {
+            loadMarketPrices();
+        }
     }
 
     document.querySelectorAll('.section-link').forEach((link) => {
@@ -278,7 +319,10 @@
     const loginUsernameError = document.getElementById('loginUsernameError');
     const loginPasswordError = document.getElementById('loginPasswordError');
     const loginSubmitError = document.getElementById('loginSubmitError');
+    const marketList = document.getElementById('marketList');
+    const marketCount = document.getElementById('marketCount');
     let usernamePoller = null;
+    let marketLoaded = false;
 
     function setMessage(element, message) {
         if (!element) {
@@ -329,6 +373,62 @@
 
     startUsernamePolling();
 
+    function formatMoney(value) {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD'
+        }).format(value);
+    }
+
+    function formatPercent(value) {
+        const prefix = value > 0 ? '+' : '';
+        return `${prefix}${value.toFixed(2)}%`;
+    }
+
+    function renderMarketPrices(stocks) {
+        if (!marketList) {
+            return;
+        }
+
+        marketList.innerHTML = '';
+        marketCount.textContent = `${stocks.length} Stocks`;
+
+        stocks.forEach((stock) => {
+            const row = document.createElement('div');
+            const directionClass = stock.change >= 0 ? 'is-up' : 'is-down';
+            const changePrefix = stock.change > 0 ? '+' : '';
+            row.className = `market-row ${directionClass}`;
+            row.innerHTML = `
+                <span class="market-symbol">${stock.symbol}</span>
+                <span>${formatMoney(stock.price)}</span>
+                <span>${changePrefix}${stock.change.toFixed(2)}</span>
+                <span>${formatPercent(stock.percent_change)}</span>
+            `;
+            marketList.appendChild(row);
+        });
+    }
+
+    async function loadMarketPrices(forceReload = false) {
+        if (!marketList) {
+            return;
+        }
+        if (marketLoaded && !forceReload) {
+            return;
+        }
+
+        marketList.innerHTML = '<div class="market-empty">Loading market data...</div>';
+
+        try {
+            const response = await fetch('/getAllPrices');
+            const data = await response.json();
+            const stocks = Array.isArray(data.stocks) ? data.stocks : [];
+            renderMarketPrices(stocks);
+            marketLoaded = true;
+        } catch (error) {
+            marketList.innerHTML = '<div class="market-empty">Unable to load market data.</div>';
+        }
+    }
+
     if (signupForm) {
         signupForm.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -365,7 +465,7 @@
                     setMessage(signupSubmitError, data.error || 'Could not create account.');
                     return;
                 }
-                window.location.href = '/home.html';
+                window.location.href = '/home';
             } catch (error) {
                 setMessage(signupSubmitError, 'Network error while creating account.');
             } finally {
@@ -408,7 +508,7 @@
                     setMessage(loginSubmitError, data.error || 'Could not log in.');
                     return;
                 }
-                window.location.href = '/home.html';
+                window.location.href = '/home';
             } catch (error) {
                 setMessage(loginSubmitError, 'Network error while logging in.');
             } finally {
