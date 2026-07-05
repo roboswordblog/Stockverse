@@ -30,6 +30,55 @@
             </div>
         </section>
 
+        <section class="market-preview">
+            <div class="preview-head">
+                <h3>Live Market Pulse</h3>
+                <p>Experience real-time volatility and test your strategy before using real money.</p>
+            </div>
+            <canvas id="marketChart" width="900" height="260" aria-label="Market chart preview"></canvas>
+            <div class="ticker-row">
+                <p><span>BTC</span> +2.31%</p>
+                <p><span>ETH</span> +1.14%</p>
+                <p><span>SOL</span> -0.48%</p>
+                <p><span>NVDA</span> +0.92%</p>
+                <p><span>TSLA</span> -0.22%</p>
+            </div>
+        </section>
+
+        <section class="reasons-grid">
+            <article class="reason-card">
+                <h3>Start Without Risk</h3>
+                <p>Every new account starts with 1000 USD in simulated funds so you can learn safely.</p>
+            </article>
+            <article class="reason-card">
+                <h3>Learn Through Real Data</h3>
+                <p>Practice in real market conditions instead of fake static examples or delayed prices.</p>
+            </article>
+            <article class="reason-card">
+                <h3>Build Repeatable Discipline</h3>
+                <p>Track what worked, what failed, and improve your entry/exit decisions over time.</p>
+            </article>
+        </section>
+
+        <section class="stats-strip">
+            <article class="stat-item">
+                <p class="stat-value">1000 USD</p>
+                <p class="stat-label">Starter Balance</p>
+            </article>
+            <article class="stat-item">
+                <p class="stat-value">Real-Time</p>
+                <p class="stat-label">Price Tracking</p>
+            </article>
+            <article class="stat-item">
+                <p class="stat-value">Zero Risk</p>
+                <p class="stat-label">Practice Mode</p>
+            </article>
+            <article class="stat-item">
+                <p class="stat-value">24/7</p>
+                <p class="stat-label">Strategy Testing</p>
+            </article>
+        </section>
+
         <section class="overview-grid">
             <article class="overview-card">
                 <h3>Live Tracking</h3>
@@ -46,6 +95,29 @@
             <article class="overview-card">
                 <h3>Strategy Testing</h3>
                 <p>Experiment with long-term and short-term ideas before making real financial decisions.</p>
+            </article>
+        </section>
+
+        <section class="journey-grid">
+            <article class="journey-card">
+                <span class="step-tag">01</span>
+                <h3>Create Your Profile</h3>
+                <p>Join in seconds, choose your username, and get your virtual capital instantly.</p>
+            </article>
+            <article class="journey-card">
+                <span class="step-tag">02</span>
+                <h3>Pick Stocks to Watch</h3>
+                <p>Track symbols and follow short-term moves before committing to a strategy.</p>
+            </article>
+            <article class="journey-card">
+                <span class="step-tag">03</span>
+                <h3>Place Simulated Trades</h3>
+                <p>Buy and sell with fake money to learn execution timing and position sizing.</p>
+            </article>
+            <article class="journey-card">
+                <span class="step-tag">04</span>
+                <h3>Review and Improve</h3>
+                <p>Analyze outcomes, refine your approach, and build consistency over time.</p>
             </article>
         </section>
     </main>
@@ -84,6 +156,67 @@
             }
         });
     });
+
+    function drawMarketChart() {
+        const canvas = document.getElementById('marketChart');
+        if (!canvas) {
+            return;
+        }
+
+        const parentWidth = canvas.parentElement ? canvas.parentElement.clientWidth : canvas.width;
+        const width = Math.max(320, Math.min(920, parentWidth - 40));
+        const height = 260;
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            return;
+        }
+
+        ctx.clearRect(0, 0, width, height);
+
+        ctx.strokeStyle = 'rgba(151, 172, 161, 0.2)';
+        ctx.lineWidth = 1;
+        for (let i = 1; i <= 4; i += 1) {
+            const y = (height / 5) * i;
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(width, y);
+            ctx.stroke();
+        }
+
+        const points = [0.50, 0.53, 0.48, 0.56, 0.54, 0.59, 0.57, 0.63, 0.61, 0.66, 0.64, 0.72, 0.69];
+        const step = width / (points.length - 1);
+
+        ctx.beginPath();
+        points.forEach((value, index) => {
+            const x = step * index;
+            const y = height - value * (height - 20);
+            if (index === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        });
+
+        ctx.strokeStyle = '#35d085';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.lineTo(width, height);
+        ctx.lineTo(0, height);
+        ctx.closePath();
+
+        const gradient = ctx.createLinearGradient(0, 0, 0, height);
+        gradient.addColorStop(0, 'rgba(53, 208, 133, 0.20)');
+        gradient.addColorStop(1, 'rgba(53, 208, 133, 0)');
+        ctx.fillStyle = gradient;
+        ctx.fill();
+    }
+
+    drawMarketChart();
+    window.addEventListener('resize', drawMarketChart);
 </script>
 </body>
 </html>

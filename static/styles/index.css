@@ -3,24 +3,23 @@
 }
 
 :root {
-    --bg-main: #060b08;
-    --bg-panel: #0c1712;
-    --bg-panel-soft: #101f18;
-    --border: #1e3f33;
-    --text-main: #d7f7e8;
-    --text-muted: #91bea9;
-    --accent: #2af598;
-    --accent-strong: #16d67d;
-    --accent-dark: #0f5136;
+    --bg-main: #060707;
+    --bg-surface: #0f1111;
+    --bg-panel: #151818;
+    --bg-panel-soft: #1a1f1d;
+    --border: #28312d;
+    --border-strong: #395248;
+    --text-main: #e4ebe7;
+    --text-muted: #9fafaa;
+    --accent: #2fcf81;
+    --accent-strong: #229961;
+    --accent-text: #05140d;
 }
 
 body {
     margin: 0;
     font-family: "Inter", "Segoe UI", Arial, sans-serif;
-    background:
-        radial-gradient(circle at 10% 10%, #10231b 0%, transparent 34%),
-        radial-gradient(circle at 92% 0%, #0d2018 0%, transparent 38%),
-        var(--bg-main);
+    background: var(--bg-main);
     color: var(--text-main);
 }
 
@@ -42,13 +41,14 @@ body {
     gap: 16px;
     flex-wrap: wrap;
     margin-bottom: 40px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
 }
 
 .brand-wrap h1 {
     margin: 0;
     font-size: clamp(1.5rem, 2.4vw, 2rem);
-    color: #e5fff2;
-    text-shadow: 0 0 20px rgba(42, 245, 152, 0.25);
+    color: #f0f4f2;
 }
 
 .brand-wrap p {
@@ -59,29 +59,25 @@ body {
 
 .header-cta {
     text-decoration: none;
-    background: linear-gradient(180deg, var(--accent), var(--accent-strong));
-    color: #052616;
+    background: var(--accent);
+    color: var(--accent-text);
     padding: 11px 16px;
     border-radius: 8px;
     font-weight: 600;
-    border: 1px solid #45ffb2;
-    box-shadow: 0 0 18px rgba(42, 245, 152, 0.34);
+    border: 1px solid #3de99a;
 }
 
 .hero {
-    background:
-        linear-gradient(135deg, rgba(22, 214, 125, 0.06), transparent 38%),
-        var(--bg-panel);
-    border: 1px solid var(--border);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-strong);
     border-radius: 8px;
     padding: clamp(20px, 3vw, 34px);
-    box-shadow: inset 0 1px 0 rgba(150, 255, 209, 0.08);
 }
 
 .hero h2 {
     margin: 0;
     font-size: clamp(1.4rem, 3vw, 2rem);
-    color: #e6fff3;
+    color: #edf2ef;
 }
 
 .hero p {
@@ -98,6 +94,58 @@ body {
     gap: 12px;
 }
 
+.market-preview {
+    margin-top: 16px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    padding: 18px;
+}
+
+.preview-head h3 {
+    margin: 0;
+    color: #edf2ef;
+    font-size: 1.1rem;
+}
+
+.preview-head p {
+    margin: 8px 0 0;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+#marketChart {
+    width: 100%;
+    margin-top: 12px;
+    background: #111514;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: block;
+}
+
+.ticker-row {
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 8px;
+}
+
+.ticker-row p {
+    margin: 0;
+    padding: 8px 10px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: #c8d6cf;
+    font-size: 0.9rem;
+}
+
+.ticker-row span {
+    color: #ecf6f1;
+    font-weight: 700;
+    margin-right: 6px;
+}
+
 .primary-btn,
 .secondary-btn {
     display: inline-block;
@@ -110,23 +158,21 @@ body {
 }
 
 .primary-btn {
-    background: linear-gradient(180deg, var(--accent), var(--accent-strong));
-    color: #052616;
-    border-color: #48ffb4;
+    background: var(--accent);
+    color: var(--accent-text);
+    border-color: #3de99a;
 }
 
 .secondary-btn {
-    background: var(--bg-panel-soft);
-    color: #bff3d8;
-    border-color: #2c5c49;
+    background: var(--bg-panel);
+    color: #c5d3cc;
+    border-color: var(--border-strong);
 }
 
 .auth-panel {
     margin-top: 8px;
-    background:
-        linear-gradient(135deg, rgba(42, 245, 152, 0.06), transparent 45%),
-        var(--bg-panel);
-    border: 1px solid var(--border);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-strong);
     border-radius: 8px;
     padding: clamp(20px, 3vw, 34px);
     max-width: 640px;
@@ -134,7 +180,7 @@ body {
 
 .auth-panel h2 {
     margin: 0;
-    color: #e6fff3;
+    color: #edf2ef;
 }
 
 .auth-panel p {
@@ -157,10 +203,61 @@ body {
     gap: 14px;
 }
 
+.reasons-grid {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.reason-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.reason-card h3 {
+    margin: 0;
+    color: #e1ece6;
+    font-size: 1.02rem;
+}
+
+.reason-card p {
+    margin: 9px 0 0;
+    color: var(--text-muted);
+    line-height: 1.45;
+}
+
+.stats-strip {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+}
+
+.stat-item {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+}
+
+.stat-value {
+    margin: 0;
+    color: #e9f5ee;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.stat-label {
+    margin: 6px 0 0;
+    color: var(--text-muted);
+    font-size: 0.84rem;
+}
+
 .overview-card {
-    background:
-        linear-gradient(180deg, rgba(42, 245, 152, 0.05), transparent 24%),
-        var(--bg-panel-soft);
+    background: var(--bg-panel-soft);
     border: 1px solid var(--border);
     border-radius: 8px;
     padding: 18px;
@@ -169,7 +266,7 @@ body {
 .overview-card h3 {
     margin: 0;
     font-size: 1.05rem;
-    color: #d9ffec;
+    color: #d6dfda;
 }
 
 .overview-card p {
@@ -178,10 +275,46 @@ body {
     line-height: 1.5;
 }
 
+.journey-grid {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.journey-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.step-tag {
+    display: inline-block;
+    border: 1px solid var(--border-strong);
+    color: #b5c7be;
+    font-size: 0.76rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.journey-card h3 {
+    margin: 10px 0 0;
+    font-size: 1rem;
+    color: #dbe6e0;
+}
+
+.journey-card p {
+    margin: 8px 0 0;
+    color: var(--text-muted);
+    line-height: 1.45;
+}
+
 .header-cta:hover,
 .primary-btn:hover,
 .secondary-btn:hover {
-    filter: brightness(1.08);
+    filter: brightness(1.12);
 }
 
 .is-hidden {
