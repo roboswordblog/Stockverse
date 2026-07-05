@@ -36,12 +36,8 @@
                 <p>Experience real-time volatility and test your strategy before using real money.</p>
             </div>
             <canvas id="marketChart" width="900" height="260" aria-label="Market chart preview"></canvas>
-            <div class="ticker-row">
-                <p><span>BTC</span> +2.31%</p>
-                <p><span>ETH</span> +1.14%</p>
-                <p><span>SOL</span> -0.48%</p>
-                <p><span>NVDA</span> +0.92%</p>
-                <p><span>TSLA</span> -0.22%</p>
+            <div id="pulseTickerRow" class="ticker-row">
+                <div class="market-empty compact-empty">Loading market pulse...</div>
             </div>
         </section>
 
@@ -244,7 +240,7 @@
         });
     });
 
-    function drawMarketChart() {
+    function drawMarketChart(stocks = []) {
         const canvas = document.getElementById('marketChart');
         if (!canvas) {
             return;
@@ -273,13 +269,27 @@
             ctx.stroke();
         }
 
-        const points = [0.50, 0.53, 0.48, 0.56, 0.54, 0.59, 0.57, 0.63, 0.61, 0.66, 0.64, 0.72, 0.69];
-        const step = width / (points.length - 1);
+        if (!stocks.length) {
+            ctx.fillStyle = '#91aea1';
+            ctx.font = '16px Segoe UI';
+            ctx.textAlign = 'center';
+            ctx.fillText('Loading market pulse...', width / 2, height / 2);
+            return;
+        }
+
+        const pulseStocks = stocks.slice(0, 12);
+        const values = pulseStocks.map((stock) => Number(stock.percent_change) || 0);
+        const minValue = Math.min(...values, 0);
+        const maxValue = Math.max(...values, 0);
+        const range = Math.max(maxValue - minValue, 1);
+        const step = width / Math.max(pulseStocks.length - 1, 1);
 
         ctx.beginPath();
-        points.forEach((value, index) => {
+        pulseStocks.forEach((stock, index) => {
+            const value = Number(stock.percent_change) || 0;
+            const normalized = (value - minValue) / range;
             const x = step * index;
-            const y = height - value * (height - 20);
+            const y = height - 20 - normalized * (height - 40);
             if (index === 0) {
                 ctx.moveTo(x, y);
             } else {
@@ -302,8 +312,31 @@
         ctx.fill();
     }
 
-    drawMarketChart();
-    window.addEventListener('resize', drawMarketChart);
+    function renderPulse(stocks) {
+        const pulseTickerRow = document.getElementById('pulseTickerRow');
+        if (!pulseTickerRow) {
+            return;
+        }
+
+        if (!stocks.length) {
+            pulseTickerRow.innerHTML = '<div class="market-empty compact-empty">Loading market pulse...</div>';
+            drawMarketChart([]);
+            return;
+        }
+
+        pulseTickerRow.innerHTML = '';
+        stocks.slice(0, 5).forEach((stock) => {
+            const item = document.createElement('p');
+            item.className = stock.change >= 0 ? 'ticker-up' : 'ticker-down';
+            const prefix = stock.percent_change > 0 ? '+' : '';
+            item.innerHTML = `<span>${stock.symbol}</span> ${prefix}${Number(stock.percent_change).toFixed(2)}%`;
+            pulseTickerRow.appendChild(item);
+        });
+        drawMarketChart(stocks);
+    }
+
+    drawMarketChart([]);
+    window.addEventListener('resize', () => drawMarketChart(latestStocks));
 
     const signupForm = document.getElementById('signupForm');
     const signupUsername = document.getElementById('signupUsername');
@@ -323,6 +356,7 @@
     const marketCount = document.getElementById('marketCount');
     let usernamePoller = null;
     let marketLoaded = false;
+    let latestStocks = [];
 
     function setMessage(element, message) {
         if (!element) {
@@ -390,6 +424,12 @@
             return;
         }
 
+        if (!stocks.length) {
+            marketList.innerHTML = '<div class="market-empty">Loading market data...</div>';
+            marketCount.textContent = 'Loading';
+            return;
+        }
+
         marketList.innerHTML = '';
         marketCount.textContent = `${stocks.length} Stocks`;
 
@@ -421,11 +461,17 @@
         try {
             const response = await fetch('/getAllPrices');
             const data = await response.json();
-            const stocks = Array.isArray(data.stocks) ? data.stocks : [];
+            const stocks = data.status === 'ready' && Array.isArray(data.stocks) ? data.stocks : [];
+            latestStocks = stocks;
+            renderPulse(stocks);
             renderMarketPrices(stocks);
-            marketLoaded = true;
+            marketLoaded = stocks.length > 0;
         } catch (error) {
+            latestStocks = [];
+            renderPulse([]);
             marketList.innerHTML = '<div class="market-empty">Unable to load market data.</div>';
+            marketCount.textContent = 'Loading';
+            marketLoaded = false;
         }
     }
 
@@ -517,6 +563,8 @@
             }
         });
     }
+
+    loadMarketPrices();
 </script>
 </body>
 </html>

@@ -56,7 +56,10 @@ def home():
 
 @app.route('/getAllPrices')
 def getAllPrices():
-    return jsonify({'stocks': get_top_100_stocks()})
+    stocks = get_top_100_stocks()
+    if stocks is None:
+        return jsonify({'status': 'loading', 'stocks': []})
+    return jsonify({'status': 'ready', 'stocks': stocks})
 
 if __name__ == '__main__':
     app.run(debug=True)

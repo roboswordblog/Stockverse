@@ -152,6 +152,14 @@ body {
     font-size: 0.9rem;
 }
 
+.ticker-up {
+    color: #58df96 !important;
+}
+
+.ticker-down {
+    color: #ff7c7c !important;
+}
+
 .ticker-row span {
     color: #ecf6f1;
     font-weight: 700;
@@ -302,6 +310,10 @@ body {
     padding: 32px 16px;
     text-align: center;
     color: var(--text-muted);
+}
+
+.compact-empty {
+    padding: 12px 8px;
 }
 
 .primary-btn {
