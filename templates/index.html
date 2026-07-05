@@ -124,6 +124,10 @@
 </div>
 <div id="signup" class="view-section is-hidden">
     <section class="auth-shell">
+        <div class="auth-topbar">
+            <a class="ghost-btn section-link" href="#" data-section="index">Back Home</a>
+            <a class="ghost-btn section-link" href="#" data-section="login">Log In</a>
+        </div>
         <h2>Create Your Trading Account</h2>
         <p>Claim your username, set a password, and start with 1000 USD in virtual funds.</p>
         <form id="signupForm" class="auth-form" novalidate>
@@ -138,10 +142,37 @@
             <button id="signupSubmit" type="submit" class="primary-btn">Create Account</button>
             <p id="signupSubmitError" class="form-error is-hidden"></p>
         </form>
+        <div class="auth-footer">
+            <span>Already have an account?</span>
+            <a class="inline-link section-link" href="#" data-section="login">Log In</a>
+        </div>
     </section>
 </div>
 <div id="login" class="view-section is-hidden">
+    <section class="auth-shell">
+        <div class="auth-topbar">
+            <a class="ghost-btn section-link" href="#" data-section="index">Back Home</a>
+            <a class="ghost-btn section-link" href="#" data-section="signup">Sign Up</a>
+        </div>
+        <h2>Log In to Continue</h2>
+        <p>Access your practice portfolio, open positions, and market watchlist.</p>
+        <form id="loginForm" class="auth-form" novalidate>
+            <label for="loginUsername">Username</label>
+            <input id="loginUsername" name="username" type="text" minlength="3" maxlength="30" autocomplete="username" required>
+            <p id="loginUsernameError" class="form-error is-hidden"></p>
 
+            <label for="loginPassword">Password</label>
+            <input id="loginPassword" name="password" type="password" minlength="6" maxlength="128" autocomplete="current-password" required>
+            <p id="loginPasswordError" class="form-error is-hidden"></p>
+
+            <button id="loginSubmit" type="submit" class="primary-btn">Log In</button>
+            <p id="loginSubmitError" class="form-error is-hidden"></p>
+        </form>
+        <div class="auth-footer">
+            <span>Need an account?</span>
+            <a class="inline-link section-link" href="#" data-section="signup">Sign Up</a>
+        </div>
+    </section>
 </div>
 <div id="market" class="view-section is-hidden">
 
@@ -240,6 +271,13 @@
     const signupUsernameError = document.getElementById('signupUsernameError');
     const signupPasswordError = document.getElementById('signupPasswordError');
     const signupSubmitError = document.getElementById('signupSubmitError');
+    const loginForm = document.getElementById('loginForm');
+    const loginUsername = document.getElementById('loginUsername');
+    const loginPassword = document.getElementById('loginPassword');
+    const loginSubmit = document.getElementById('loginSubmit');
+    const loginUsernameError = document.getElementById('loginUsernameError');
+    const loginPasswordError = document.getElementById('loginPasswordError');
+    const loginSubmitError = document.getElementById('loginSubmitError');
     let usernamePoller = null;
 
     function setMessage(element, message) {
@@ -294,6 +332,7 @@
     if (signupForm) {
         signupForm.addEventListener('submit', async (event) => {
             event.preventDefault();
+            setMessage(signupUsernameError, '');
             setMessage(signupPasswordError, '');
             setMessage(signupSubmitError, '');
 
@@ -332,6 +371,49 @@
             } finally {
                 signupSubmit.disabled = false;
                 signupSubmit.textContent = 'Create Account';
+            }
+        });
+    }
+
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            setMessage(loginUsernameError, '');
+            setMessage(loginPasswordError, '');
+            setMessage(loginSubmitError, '');
+
+            const username = loginUsername.value.trim();
+            const password = loginPassword.value.trim();
+
+            if (username.length < 3) {
+                setMessage(loginUsernameError, 'Username must be at least 3 characters.');
+                return;
+            }
+            if (password.length < 6) {
+                setMessage(loginPasswordError, 'Password must be at least 6 characters.');
+                return;
+            }
+
+            loginSubmit.disabled = true;
+            loginSubmit.textContent = 'Logging In...';
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username, password})
+                });
+                const data = await response.json();
+                if (!response.ok || !data.ok) {
+                    setMessage(loginSubmitError, data.error || 'Could not log in.');
+                    return;
+                }
+                window.location.href = '/home.html';
+            } catch (error) {
+                setMessage(loginSubmitError, 'Network error while logging in.');
+            } finally {
+                loginSubmit.disabled = false;
+                loginSubmit.textContent = 'Log In';
             }
         });
     }

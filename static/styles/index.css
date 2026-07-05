@@ -157,6 +157,18 @@ body {
     text-decoration: none;
 }
 
+.ghost-btn {
+    display: inline-block;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-panel);
+    color: #d0dbd5;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
 .primary-btn {
     background: var(--accent);
     color: var(--accent-text);
@@ -185,6 +197,13 @@ body {
     border: 1px solid var(--border-strong);
     border-radius: 8px;
     padding: 24px;
+}
+
+.auth-topbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
 }
 
 .auth-shell h2 {
@@ -230,6 +249,21 @@ body {
     color: #ff8080;
     font-size: 0.86rem;
     min-height: 1.1em;
+}
+
+.auth-footer {
+    margin-top: 18px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    color: var(--text-muted);
+    font-size: 0.92rem;
+}
+
+.inline-link {
+    color: #79e7b0;
+    text-decoration: none;
+    font-weight: 600;
 }
 
 .auth-panel h2 {
@@ -366,6 +400,8 @@ body {
 }
 
 .header-cta:hover,
+.ghost-btn:hover,
+.inline-link:hover,
 .primary-btn:hover,
 .secondary-btn:hover {
     filter: brightness(1.12);
