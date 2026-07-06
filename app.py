@@ -61,5 +61,9 @@ def getAllPrices():
         return jsonify({'status': 'loading', 'stocks': []})
     return jsonify({'status': 'ready', 'stocks': stocks})
 
+@app.route('/getStockStats')
+def getStockStats():
+    pass
+
 if __name__ == '__main__':
     app.run(debug=True)
