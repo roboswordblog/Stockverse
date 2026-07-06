@@ -19,7 +19,6 @@
                 <span>Balance</span>
                 <strong id="accountBalance">Loading...</strong>
             </div>
-            <button id="refreshOverview" class="ghost-btn" type="button">Refresh</button>
         </div>
     </header>
 
@@ -54,6 +53,41 @@
             </div>
         </section>
     </main>
+
+    <section class="panel search-panel">
+        <div class="panel-head">
+            <div>
+                <h2>Search Stocks</h2>
+                <p>Search for more symbols beyond the top 10.</p>
+            </div>
+        </div>
+        <div class="search-bar">
+            <input id="stockSearchInput" type="text" placeholder="Search by symbol or company name">
+        </div>
+        <div id="searchResults" class="search-results">
+            <div class="panel-empty">Type to search for stocks.</div>
+        </div>
+    </section>
+
+    <section class="panel holdings-panel">
+        <div class="panel-head">
+            <div>
+                <h2>Bought Stocks</h2>
+                <p>Your active positions with quick sell controls.</p>
+            </div>
+        </div>
+        <div class="holdings-head">
+            <span>Stock</span>
+            <span>Shares</span>
+            <span>Avg Buy</span>
+            <span>Current</span>
+            <span>P/L</span>
+            <span>Action</span>
+        </div>
+        <div id="holdingsList" class="holdings-list">
+            <div class="panel-empty">No bought stocks yet.</div>
+        </div>
+    </section>
 </div>
 
 <div id="stock" class="stock-shell is-hidden">
@@ -116,6 +150,12 @@
                 <button class="primary-btn" type="submit">Buy</button>
                 <p id="buyMessage" class="info-message is-hidden"></p>
             </form>
+            <form id="sellForm" class="buy-form sell-form" novalidate>
+                <label for="sellShares">Sell Shares</label>
+                <input id="sellShares" type="number" min="1" step="1" value="1" required>
+                <button class="ghost-btn" type="submit">Sell</button>
+                <p id="sellMessage" class="info-message is-hidden"></p>
+            </form>
         </section>
     </main>
 </div>
@@ -126,15 +166,22 @@
     const accountBalance = document.getElementById('accountBalance');
     const topStocksList = document.getElementById('topStocksList');
     const followedStocksList = document.getElementById('followedStocksList');
-    const refreshOverview = document.getElementById('refreshOverview');
+    const holdingsList = document.getElementById('holdingsList');
     const backToHome = document.getElementById('backToHome');
     const detailFollowButton = document.getElementById('detailFollowButton');
     const buyForm = document.getElementById('buyForm');
     const buyShares = document.getElementById('buyShares');
     const buyMessage = document.getElementById('buyMessage');
+    const sellForm = document.getElementById('sellForm');
+    const sellShares = document.getElementById('sellShares');
+    const sellMessage = document.getElementById('sellMessage');
+    const stockSearchInput = document.getElementById('stockSearchInput');
+    const searchResults = document.getElementById('searchResults');
 
-    let overviewState = { top_stocks: [], followed_stocks: [], balance: 0 };
+    let overviewState = { top_stocks: [], followed_stocks: [], holdings: [], balance: 0 };
     let currentStock = null;
+    let overviewPoller = null;
+    let searchPoller = null;
 
     function formatMoney(value) {
         return new Intl.NumberFormat('en-US', {
@@ -210,6 +257,50 @@
         });
     }
 
+    function renderHoldings(holdings) {
+        if (!holdings.length) {
+            holdingsList.innerHTML = '<div class="panel-empty">No bought stocks yet.</div>';
+            return;
+        }
+
+        holdingsList.innerHTML = '';
+        holdings.forEach((holding) => {
+            const item = document.createElement('div');
+            const pnlClass = Number(holding.position_change) >= 0 ? 'is-up' : 'is-down';
+            item.className = `holding-row ${pnlClass}`;
+            item.innerHTML = `
+                <button class="stock-link" type="button" data-symbol="${holding.symbol}">${holding.symbol}</button>
+                <span>${holding.shares}</span>
+                <span>${formatMoney(holding.average_price)}</span>
+                <span>${formatMoney(holding.current_price)}</span>
+                <span>${formatPercent(holding.position_change_percent)}</span>
+                <div class="holding-action">
+                    <input class="sell-input" type="number" min="1" max="${holding.shares}" value="1" data-symbol="${holding.symbol}">
+                    <button class="ghost-btn inline-sell-button" type="button" data-symbol="${holding.symbol}">Sell</button>
+                </div>
+            `;
+            holdingsList.appendChild(item);
+        });
+    }
+
+    function renderSearchResults(results) {
+        if (!results.length) {
+            searchResults.innerHTML = '<div class="panel-empty">No stocks found.</div>';
+            return;
+        }
+
+        searchResults.innerHTML = '';
+        results.forEach((result) => {
+            const row = document.createElement('div');
+            row.className = 'search-result-row';
+            row.innerHTML = `
+                <button class="stock-link" type="button" data-symbol="${result.symbol}">${result.symbol}</button>
+                <span>${result.description || result.symbol}</span>
+            `;
+            searchResults.appendChild(row);
+        });
+    }
+
     function bindStockLinks() {
         document.querySelectorAll('.stock-link').forEach((button) => {
             button.onclick = () => loadStockDetail(button.dataset.symbol);
@@ -217,11 +308,20 @@
         document.querySelectorAll('.follow-button').forEach((button) => {
             button.onclick = () => toggleFollow(button.dataset.symbol);
         });
+        document.querySelectorAll('.inline-sell-button').forEach((button) => {
+            button.onclick = async () => {
+                const input = document.querySelector(`.sell-input[data-symbol="${button.dataset.symbol}"]`);
+                const shares = Number(input ? input.value : 0);
+                await sellHolding(button.dataset.symbol, shares);
+            };
+        });
     }
 
     async function loadOverview() {
-        topStocksList.innerHTML = '<div class="panel-empty">Loading top stocks...</div>';
-        followedStocksList.innerHTML = '<div class="panel-empty">Loading followed stocks...</div>';
+        if (!overviewState.top_stocks.length) {
+            topStocksList.innerHTML = '<div class="panel-empty">Loading top stocks...</div>';
+            followedStocksList.innerHTML = '<div class="panel-empty">Loading followed stocks...</div>';
+        }
 
         const response = await fetch('/api/home/overview');
         const data = await response.json();
@@ -235,6 +335,7 @@
         accountBalance.textContent = formatMoney(data.balance);
         renderTopStocks(data.top_stocks || []);
         renderFollowedStocks(data.followed_stocks || []);
+        renderHoldings(data.holdings || []);
         bindStockLinks();
     }
 
@@ -277,7 +378,42 @@
         detailFollowButton.textContent = data.stock.followed ? 'Unfollow' : 'Follow';
         accountBalance.textContent = formatMoney(data.balance);
         buyMessage.classList.add('is-hidden');
+        sellMessage.classList.add('is-hidden');
         showStock();
+    }
+
+    async function sellHolding(symbol, shares) {
+        const response = await fetch('/api/sell', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ symbol, shares })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+            return;
+        }
+        accountBalance.textContent = formatMoney(data.balance);
+        await loadOverview();
+        if (currentStock && currentStock.symbol === symbol) {
+            await loadStockDetail(symbol);
+        }
+    }
+
+    async function searchForStocks() {
+        const query = stockSearchInput.value.trim();
+        if (!query) {
+            searchResults.innerHTML = '<div class="panel-empty">Type to search for stocks.</div>';
+            return;
+        }
+
+        const response = await fetch(`/api/search-stocks?q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+            searchResults.innerHTML = '<div class="panel-empty">Unable to search right now.</div>';
+            return;
+        }
+        renderSearchResults(data.results || []);
+        bindStockLinks();
     }
 
     detailFollowButton.addEventListener('click', async () => {
@@ -314,11 +450,53 @@
 
         setInfoMessage(buyMessage, `${data.message} New balance: ${formatMoney(data.balance)}`);
         accountBalance.textContent = formatMoney(data.balance);
+        await loadOverview();
+        await loadStockDetail(currentStock.symbol);
     });
 
-    refreshOverview.addEventListener('click', loadOverview);
-    backToHome.addEventListener('click', showHome);
+    sellForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!currentStock) {
+            return;
+        }
 
+        const shares = Number(sellShares.value);
+        const response = await fetch('/api/sell', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                symbol: currentStock.symbol,
+                shares
+            })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+            setInfoMessage(sellMessage, data.error || 'Unable to sell stock.', true);
+            return;
+        }
+
+        setInfoMessage(sellMessage, `${data.message} New balance: ${formatMoney(data.balance)}`);
+        accountBalance.textContent = formatMoney(data.balance);
+        await loadOverview();
+        await loadStockDetail(currentStock.symbol);
+    });
+
+    backToHome.addEventListener('click', showHome);
+    stockSearchInput.addEventListener('input', () => {
+        if (searchPoller) {
+            clearTimeout(searchPoller);
+        }
+        searchPoller = setTimeout(searchForStocks, 250);
+    });
+
+    function startOverviewPolling() {
+        if (overviewPoller) {
+            clearInterval(overviewPoller);
+        }
+        overviewPoller = setInterval(loadOverview, 15000);
+    }
+
+    startOverviewPolling();
     loadOverview();
 </script>
 </body>

@@ -49,6 +49,21 @@ def create_user_database() -> Path:
                 )
                 """
             )
+            cursor.execute(
+                """
+                CREATE TABLE user_trades (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username TEXT NOT NULL,
+                    symbol TEXT NOT NULL,
+                    shares INTEGER NOT NULL,
+                    remaining_shares INTEGER NOT NULL,
+                    bought_price REAL NOT NULL,
+                    bought_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    sold_price REAL,
+                    sold_at DATETIME
+                )
+                """
+            )
         else:
             cursor.execute(
                 """
@@ -87,6 +102,21 @@ def create_user_database() -> Path:
                     shares INTEGER NOT NULL DEFAULT 0,
                     average_price REAL NOT NULL DEFAULT 0,
                     UNIQUE(username, symbol)
+                )
+                """
+            )
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS user_trades (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username TEXT NOT NULL,
+                    symbol TEXT NOT NULL,
+                    shares INTEGER NOT NULL,
+                    remaining_shares INTEGER NOT NULL,
+                    bought_price REAL NOT NULL,
+                    bought_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    sold_price REAL,
+                    sold_at DATETIME
                 )
                 """
             )
@@ -148,6 +178,29 @@ def get_followed_symbols(username: str) -> list[str]:
             (username,),
         )
         return [row[0] for row in cursor.fetchall()]
+
+
+def get_user_holdings(username: str) -> list[dict]:
+    create_user_database()
+    with _connect() as connection:
+        cursor = connection.cursor()
+        cursor.execute(
+            """
+            SELECT symbol, shares, average_price
+            FROM user_holdings
+            WHERE username = ? AND shares > 0
+            ORDER BY symbol ASC
+            """,
+            (username,),
+        )
+        return [
+            {
+                "symbol": row[0],
+                "shares": int(row[1]),
+                "average_price": round(float(row[2]), 2),
+            }
+            for row in cursor.fetchall()
+        ]
 
 
 def follow_stock(username: str, symbol: str) -> bool:
@@ -224,8 +277,133 @@ def buy_stock(username: str, symbol: str, shares: int, price: float) -> tuple[bo
             )
 
         cursor.execute(
+            """
+            INSERT INTO user_trades (username, symbol, shares, remaining_shares, bought_price)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (username, symbol, shares, shares, round(price, 2)),
+        )
+        cursor.execute(
             "UPDATE users SET money = ? WHERE username = ?",
             (round(current_money - total_cost, 2), username),
         )
         connection.commit()
         return True, "Bought successfully."
+
+
+def sell_stock(username: str, symbol: str, shares: int, price: float) -> tuple[bool, str]:
+    if shares <= 0 or price <= 0:
+        return False, "Invalid order."
+
+    create_user_database()
+    with _connect() as connection:
+        cursor = connection.cursor()
+        cursor.execute(
+            "SELECT shares, average_price FROM user_holdings WHERE username = ? AND symbol = ?",
+            (username, symbol),
+        )
+        holding = cursor.fetchone()
+        if not holding:
+            return False, "You do not own this stock."
+
+        owned_shares = int(holding[0])
+        average_price = float(holding[1])
+        if shares > owned_shares:
+            return False, "Not enough shares to sell."
+
+        cursor.execute("SELECT money FROM users WHERE username = ?", (username,))
+        money_row = cursor.fetchone()
+        if not money_row:
+            return False, "User not found."
+        current_money = float(money_row[0])
+
+        cursor.execute(
+            """
+            SELECT id, shares, remaining_shares, bought_price, bought_at
+            FROM user_trades
+            WHERE username = ? AND symbol = ? AND remaining_shares > 0
+            ORDER BY bought_at ASC, id ASC
+            """,
+            (username, symbol),
+        )
+        open_lots = cursor.fetchall()
+
+        if not open_lots:
+            cursor.execute(
+                """
+                INSERT INTO user_trades (username, symbol, shares, remaining_shares, bought_price)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (username, symbol, owned_shares, owned_shares, round(average_price, 2)),
+            )
+            cursor.execute(
+                """
+                SELECT id, shares, remaining_shares, bought_price, bought_at
+                FROM user_trades
+                WHERE username = ? AND symbol = ? AND remaining_shares > 0
+                ORDER BY bought_at ASC, id ASC
+                """,
+                (username, symbol),
+            )
+            open_lots = cursor.fetchall()
+
+        shares_to_sell = shares
+        for trade_id, lot_shares, remaining_shares, bought_price, bought_at in open_lots:
+            if shares_to_sell <= 0:
+                break
+
+            lot_remaining = int(remaining_shares)
+            if lot_remaining <= shares_to_sell:
+                cursor.execute(
+                    """
+                    UPDATE user_trades
+                    SET remaining_shares = 0, sold_price = ?, sold_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                    """,
+                    (round(price, 2), trade_id),
+                )
+                shares_to_sell -= lot_remaining
+            else:
+                sold_shares = shares_to_sell
+                cursor.execute(
+                    """
+                    INSERT INTO user_trades (
+                        username, symbol, shares, remaining_shares, bought_price, bought_at, sold_price, sold_at
+                    )
+                    VALUES (?, ?, ?, 0, ?, ?, ?, CURRENT_TIMESTAMP)
+                    """,
+                    (username, symbol, sold_shares, round(float(bought_price), 2), bought_at, round(price, 2)),
+                )
+                cursor.execute(
+                    """
+                    UPDATE user_trades
+                    SET shares = ?, remaining_shares = ?
+                    WHERE id = ?
+                    """,
+                    (int(lot_shares) - sold_shares, lot_remaining - sold_shares, trade_id),
+                )
+                shares_to_sell = 0
+
+        new_share_total = owned_shares - shares
+        if new_share_total > 0:
+            cursor.execute(
+                """
+                UPDATE user_holdings
+                SET shares = ?
+                WHERE username = ? AND symbol = ?
+                """,
+                (new_share_total, username, symbol),
+            )
+        else:
+            cursor.execute(
+                "DELETE FROM user_holdings WHERE username = ? AND symbol = ?",
+                (username, symbol),
+            )
+
+        proceeds = round(shares * price, 2)
+        cursor.execute(
+            "UPDATE users SET money = ? WHERE username = ?",
+            (round(current_money + proceeds, 2), username),
+        )
+        connection.commit()
+        return True, "Sold successfully."

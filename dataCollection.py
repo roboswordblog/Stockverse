@@ -147,3 +147,33 @@ def get_stock_profile(symbol: str) -> dict | None:
         }
     except (RuntimeError, HTTPError, URLError, ValueError, TypeError):
         return None
+
+
+def search_stocks(query: str) -> list[dict]:
+    cleaned = query.strip()
+    if not cleaned:
+        return []
+
+    try:
+        response = _finnhub_get("/search", {"q": cleaned})
+        results = []
+        for item in response.get("result", [])[:30]:
+            symbol = (item.get("symbol") or "").strip()
+            description = (item.get("description") or symbol).strip()
+            if not symbol:
+                continue
+            results.append(
+                {
+                    "symbol": symbol,
+                    "description": description,
+                    "type": (item.get("type") or "").strip(),
+                }
+            )
+        return results
+    except (RuntimeError, HTTPError, URLError, ValueError, TypeError):
+        lowered = cleaned.lower()
+        return [
+            {"symbol": symbol, "description": symbol, "type": "cached"}
+            for symbol in TOP_100_STOCKS
+            if lowered in symbol.lower()
+        ][:30]

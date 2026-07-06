@@ -6,13 +6,15 @@ from database import (
     create_user_database,
     follow_stock,
     get_followed_symbols,
+    get_user_holdings,
     get_user_money,
     login_user,
+    sell_stock,
     signup_user,
     unfollow_stock,
     username_exists,
 )
-from dataCollection import get_stock_profile, get_stock_quote, get_top_100_stocks
+from dataCollection import get_stock_profile, get_stock_quote, get_top_100_stocks, search_stocks
 
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "stockverse-dev-secret")
@@ -94,6 +96,22 @@ def home_overview():
     top_ten = stocks[:10]
     followed_symbols = set(get_followed_symbols(username))
     followed = [stock for stock in stocks if stock["symbol"] in followed_symbols]
+    stock_map = {stock["symbol"]: stock for stock in stocks}
+    holdings = []
+    for holding in get_user_holdings(username):
+        stock_info = stock_map.get(holding["symbol"]) or get_stock_quote(holding["symbol"]) or {}
+        current_price = float(stock_info.get("price") or 0)
+        change_value = round(current_price - holding["average_price"], 2) if current_price else 0.0
+        percent_change = round((change_value / holding["average_price"]) * 100, 2) if holding["average_price"] else 0.0
+        holdings.append(
+            {
+                **holding,
+                "current_price": round(current_price, 2),
+                "position_value": round(current_price * holding["shares"], 2),
+                "position_change": change_value,
+                "position_change_percent": percent_change,
+            }
+        )
 
     return jsonify(
         {
@@ -105,6 +123,7 @@ def home_overview():
                 for stock in top_ten
             ],
             "followed_stocks": followed,
+            "holdings": holdings,
         }
     )
 
@@ -167,7 +186,8 @@ def buy():
     data = request.get_json(silent=True) or {}
     symbol = (data.get("symbol") or "").strip().upper()
     shares = int(data.get("shares") or 0)
-    price = float(data.get("price") or 0)
+    quote = get_stock_quote(symbol) if symbol else None
+    price = float((quote or {}).get("price") or 0)
     if not symbol or shares <= 0 or price <= 0:
         return jsonify({"ok": False, "error": "Invalid order."}), 400
 
@@ -175,6 +195,34 @@ def buy():
     if not success:
         return jsonify({"ok": False, "error": message}), 400
     return jsonify({"ok": True, "message": message, "balance": get_user_money(username)})
+
+@app.route('/api/sell', methods=['POST'])
+def sell():
+    username = _current_username()
+    if not username:
+        return jsonify({"ok": False, "error": "Not logged in."}), 401
+
+    data = request.get_json(silent=True) or {}
+    symbol = (data.get("symbol") or "").strip().upper()
+    shares = int(data.get("shares") or 0)
+    quote = get_stock_quote(symbol) if symbol else None
+    price = float((quote or {}).get("price") or 0)
+    if not symbol or shares <= 0 or price <= 0:
+        return jsonify({"ok": False, "error": "Invalid order."}), 400
+
+    success, message = sell_stock(username, symbol, shares, price)
+    if not success:
+        return jsonify({"ok": False, "error": message}), 400
+    return jsonify({"ok": True, "message": message, "balance": get_user_money(username)})
+
+@app.route('/api/search-stocks')
+def search_stock_list():
+    username = _current_username()
+    if not username:
+        return jsonify({"ok": False, "error": "Not logged in."}), 401
+
+    query = (request.args.get("q") or "").strip()
+    return jsonify({"ok": True, "results": search_stocks(query)})
 
 if __name__ == '__main__':
     app.run(debug=True)
