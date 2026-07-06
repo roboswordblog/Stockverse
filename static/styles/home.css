@@ -1,0 +1,372 @@
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-main: #070909;
+    --bg-panel: #111515;
+    --bg-panel-soft: #171d1c;
+    --border: #27302d;
+    --border-strong: #385147;
+    --text-main: #edf2ef;
+    --text-muted: #9caea7;
+    --accent: #31cf83;
+    --accent-dark: #07160e;
+    --danger: #ff8282;
+    --success: #5fdea1;
+    --shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: var(--text-main);
+    background:
+        radial-gradient(circle at top left, rgba(49, 207, 131, 0.08), transparent 24%),
+        linear-gradient(180deg, #050707 0%, #0a0d0c 100%);
+}
+
+.home-shell,
+.stock-shell {
+    min-height: 100vh;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 28px clamp(16px, 4vw, 44px) 40px;
+}
+
+.home-header,
+.stock-header,
+.panel {
+    background: rgba(17, 21, 21, 0.96);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+}
+
+.home-header,
+.stock-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: flex-start;
+    padding: 22px;
+}
+
+.eyebrow {
+    margin: 0 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.78rem;
+    color: var(--accent);
+}
+
+h1,
+h2 {
+    margin: 0;
+}
+
+.subtle {
+    margin: 8px 0 0;
+    color: var(--text-muted);
+}
+
+.header-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.balance-card {
+    min-width: 160px;
+    background: var(--bg-panel-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+
+.balance-card span {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.balance-card strong {
+    font-size: 1.1rem;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(320px, 0.95fr);
+    gap: 18px;
+    margin-top: 18px;
+}
+
+.panel {
+    padding: 20px;
+}
+
+.panel-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 14px;
+}
+
+.panel-head p {
+    margin: 6px 0 0;
+    color: var(--text-muted);
+}
+
+.stock-table,
+.stock-row {
+    display: grid;
+    grid-template-columns: minmax(100px, 1.2fr) 1fr 1fr auto;
+    gap: 12px;
+    align-items: center;
+}
+
+.stock-table-head {
+    padding: 0 0 12px;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.stock-table-body {
+    display: grid;
+    gap: 10px;
+}
+
+.stock-row,
+.followed-item {
+    background: var(--bg-panel-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+
+.followed-list {
+    display: grid;
+    gap: 10px;
+}
+
+.followed-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+}
+
+.followed-item p {
+    margin: 6px 0 0;
+    color: var(--text-muted);
+}
+
+.stock-link {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    color: var(--text-main);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.stock-link:hover {
+    color: var(--accent);
+}
+
+.ghost-btn,
+.primary-btn {
+    border-radius: 10px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    font: inherit;
+    cursor: pointer;
+}
+
+.ghost-btn {
+    background: var(--bg-panel-soft);
+    color: var(--text-main);
+}
+
+.primary-btn {
+    background: var(--accent);
+    color: var(--accent-dark);
+    border-color: #4bea9d;
+    font-weight: 700;
+}
+
+.stock-header-left,
+.stock-header-actions,
+.detail-price-row,
+.detail-stats-grid,
+.stock-layout,
+.buy-form {
+    display: flex;
+}
+
+.stock-header-left {
+    gap: 14px;
+    align-items: flex-start;
+}
+
+.stock-layout {
+    gap: 18px;
+    margin-top: 18px;
+    align-items: flex-start;
+}
+
+.detail-overview {
+    flex: 1.4;
+}
+
+.buy-panel {
+    flex: 0.85;
+}
+
+.detail-price-row {
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.detail-label {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-bottom: 4px;
+}
+
+#detailPrice,
+#detailChange {
+    font-size: 1.7rem;
+}
+
+.detail-stats-grid {
+    margin-top: 18px;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.detail-stat-card {
+    min-width: 150px;
+    flex: 1;
+    background: var(--bg-panel-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+}
+
+.detail-stat-card span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-bottom: 6px;
+}
+
+.buy-form {
+    flex-direction: column;
+    gap: 10px;
+}
+
+.buy-form label {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.buy-form input {
+    height: 44px;
+    border-radius: 10px;
+    border: 1px solid var(--border-strong);
+    background: #0f1413;
+    color: var(--text-main);
+    padding: 0 12px;
+    font: inherit;
+}
+
+.panel-empty,
+.info-message {
+    color: var(--text-muted);
+}
+
+.panel-empty {
+    padding: 24px 0;
+}
+
+.info-message {
+    margin: 4px 0 0;
+}
+
+.info-message.is-error {
+    color: var(--danger);
+}
+
+.is-up {
+    color: var(--success);
+}
+
+.is-down {
+    color: var(--danger);
+}
+
+.detail-up {
+    color: var(--success);
+}
+
+.detail-down {
+    color: var(--danger);
+}
+
+.is-hidden {
+    display: none !important;
+}
+
+@media (max-width: 960px) {
+    .dashboard-grid,
+    .stock-layout {
+        grid-template-columns: 1fr;
+        flex-direction: column;
+    }
+
+    .stock-table,
+    .stock-row {
+        grid-template-columns: minmax(84px, 1fr) 1fr 1fr;
+    }
+
+    .stock-table-head span:last-child,
+    .stock-row button.follow-button {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 700px) {
+    .home-shell,
+    .stock-shell {
+        padding: 16px;
+    }
+
+    .home-header,
+    .stock-header,
+    .panel {
+        padding: 16px;
+    }
+
+    .stock-table-head {
+        display: none;
+    }
+
+    .stock-row {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .stock-row span:last-of-type,
+    .stock-row button.follow-button {
+        grid-column: 1 / -1;
+    }
+}

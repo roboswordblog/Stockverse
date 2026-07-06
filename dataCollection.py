@@ -100,3 +100,50 @@ def get_top_100_stocks() -> list[dict] | None:
         return _sorted_stock_list(stock_map) or None
     except (RuntimeError, URLError, ValueError, TypeError):
         return _sorted_stock_list(stock_map) or None
+
+
+def get_stock_quote(symbol: str) -> dict | None:
+    try:
+        quote = _finnhub_get("/quote", {"symbol": symbol})
+        current_price = float(quote.get("c") or 0)
+        previous_close = float(quote.get("pc") or 0)
+        change = round(current_price - previous_close, 2)
+        percent_change = round((change / previous_close) * 100, 2) if previous_close else 0.0
+        return {
+            "symbol": symbol,
+            "price": round(current_price, 2),
+            "change": change,
+            "percent_change": percent_change,
+            "high": round(float(quote.get("h") or 0), 2),
+            "low": round(float(quote.get("l") or 0), 2),
+            "open": round(float(quote.get("o") or 0), 2),
+            "previous_close": round(previous_close, 2),
+        }
+    except (RuntimeError, HTTPError, URLError, ValueError, TypeError):
+        cached = _read_cache().get(symbol)
+        if not cached:
+            return None
+        return {
+            "symbol": symbol,
+            "price": round(float(cached.get("price") or 0), 2),
+            "change": round(float(cached.get("change") or 0), 2),
+            "percent_change": round(float(cached.get("percent_change") or 0), 2),
+            "high": round(float(cached.get("price") or 0), 2),
+            "low": round(float(cached.get("price") or 0), 2),
+            "open": round(float(cached.get("price") or 0), 2),
+            "previous_close": round(float(cached.get("price") or 0) - float(cached.get("change") or 0), 2),
+        }
+
+
+def get_stock_profile(symbol: str) -> dict | None:
+    try:
+        profile = _finnhub_get("/stock/profile2", {"symbol": symbol})
+        return {
+            "name": profile.get("name") or symbol,
+            "exchange": profile.get("exchange") or "Unknown",
+            "industry": profile.get("finnhubIndustry") or "Unknown",
+            "country": profile.get("country") or "Unknown",
+            "weburl": profile.get("weburl") or "",
+        }
+    except (RuntimeError, HTTPError, URLError, ValueError, TypeError):
+        return None

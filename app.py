@@ -1,9 +1,27 @@
-from flask import Flask, jsonify, render_template, request
-from database import create_user_database, login_user, signup_user, username_exists
-from dataCollection import get_top_100_stocks
+import os
+
+from flask import Flask, jsonify, render_template, request, session
+from database import (
+    buy_stock,
+    create_user_database,
+    follow_stock,
+    get_followed_symbols,
+    get_user_money,
+    login_user,
+    signup_user,
+    unfollow_stock,
+    username_exists,
+)
+from dataCollection import get_stock_profile, get_stock_quote, get_top_100_stocks
 
 app = Flask(__name__)
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "stockverse-dev-secret")
 create_user_database()
+
+
+def _current_username() -> str | None:
+    username = session.get("username")
+    return username.strip() if isinstance(username, str) and username.strip() else None
 
 @app.route('/')
 def index():
@@ -33,6 +51,7 @@ def signup():
     if not created:
         return jsonify({'ok': False, 'error': 'Unable to create account.'}), 500
 
+    session["username"] = username
     return jsonify({'ok': True})
 
 
@@ -48,11 +67,15 @@ def login():
     if not login_user(username, password):
         return jsonify({'ok': False, 'error': 'Invalid username or password.'}), 401
 
+    session["username"] = username
     return jsonify({'ok': True})
 
 @app.route('/home')
 def home():
-    return render_template('home.html')
+    username = _current_username()
+    if not username:
+        return render_template('index.html')
+    return render_template('home.html', username=username)
 
 @app.route('/getAllPrices')
 def getAllPrices():
@@ -61,9 +84,97 @@ def getAllPrices():
         return jsonify({'status': 'loading', 'stocks': []})
     return jsonify({'status': 'ready', 'stocks': stocks})
 
+@app.route('/api/home/overview')
+def home_overview():
+    username = _current_username()
+    if not username:
+        return jsonify({"ok": False, "error": "Not logged in."}), 401
+
+    stocks = get_top_100_stocks() or []
+    top_ten = stocks[:10]
+    followed_symbols = set(get_followed_symbols(username))
+    followed = [stock for stock in stocks if stock["symbol"] in followed_symbols]
+
+    return jsonify(
+        {
+            "ok": True,
+            "username": username,
+            "balance": get_user_money(username),
+            "top_stocks": [
+                {**stock, "followed": stock["symbol"] in followed_symbols}
+                for stock in top_ten
+            ],
+            "followed_stocks": followed,
+        }
+    )
+
+@app.route('/api/follow', methods=['POST'])
+def follow():
+    username = _current_username()
+    if not username:
+        return jsonify({"ok": False, "error": "Not logged in."}), 401
+
+    data = request.get_json(silent=True) or {}
+    symbol = (data.get("symbol") or "").strip().upper()
+    action = (data.get("action") or "follow").strip().lower()
+    if not symbol:
+        return jsonify({"ok": False, "error": "Symbol is required."}), 400
+
+    if action == "unfollow":
+        unfollow_stock(username, symbol)
+        return jsonify({"ok": True, "followed": False})
+
+    follow_stock(username, symbol)
+    return jsonify({"ok": True, "followed": True})
+
 @app.route('/getStockStats')
 def getStockStats():
-    pass
+    username = _current_username()
+    if not username:
+        return jsonify({"ok": False, "error": "Not logged in."}), 401
+
+    symbol = (request.args.get("symbol") or "").strip().upper()
+    if not symbol:
+        return jsonify({"ok": False, "error": "Symbol is required."}), 400
+
+    quote = get_stock_quote(symbol)
+    if quote is None:
+        return jsonify({"ok": False, "error": "Unable to load stock data."}), 503
+
+    profile = get_stock_profile(symbol) or {}
+    followed = symbol in set(get_followed_symbols(username))
+    return jsonify(
+        {
+            "ok": True,
+            "stock": {
+                **quote,
+                "name": profile.get("name", symbol),
+                "exchange": profile.get("exchange", "Unknown"),
+                "industry": profile.get("industry", "Unknown"),
+                "country": profile.get("country", "Unknown"),
+                "followed": followed,
+            },
+            "balance": get_user_money(username),
+        }
+    )
+
+@app.route('/api/buy', methods=['POST'])
+def buy():
+    username = _current_username()
+    if not username:
+        return jsonify({"ok": False, "error": "Not logged in."}), 401
+
+    data = request.get_json(silent=True) or {}
+    symbol = (data.get("symbol") or "").strip().upper()
+    shares = int(data.get("shares") or 0)
+    price = float(data.get("price") or 0)
+    if not symbol or shares <= 0 or price <= 0:
+        return jsonify({"ok": False, "error": "Invalid order."}), 400
+
+    success, message = buy_stock(username, symbol, shares, price)
+    if not success:
+        return jsonify({"ok": False, "error": message}), 400
+    return jsonify({"ok": True, "message": message, "balance": get_user_money(username)})
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -7,13 +7,319 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/home.css') }}">
 </head>
 <body>
+<div id="home" class="home-shell">
+    <header class="home-header">
+        <div>
+            <p class="eyebrow">Stockverse</p>
+            <h1>Market Home</h1>
+            <p class="subtle">Welcome back, <span id="welcomeName">{{ username }}</span>.</p>
+        </div>
+        <div class="header-meta">
+            <div class="balance-card">
+                <span>Balance</span>
+                <strong id="accountBalance">Loading...</strong>
+            </div>
+            <button id="refreshOverview" class="ghost-btn" type="button">Refresh</button>
+        </div>
+    </header>
 
-<div id="home">
+    <main class="dashboard-grid">
+        <section class="panel top-stocks-panel">
+            <div class="panel-head">
+                <div>
+                    <h2>Top 10 Stocks</h2>
+                    <p>Click a symbol to open the stock page.</p>
+                </div>
+            </div>
+            <div class="stock-table stock-table-head">
+                <span>Stock</span>
+                <span>Price</span>
+                <span>Change</span>
+                <span>Action</span>
+            </div>
+            <div id="topStocksList" class="stock-table-body">
+                <div class="panel-empty">Loading top stocks...</div>
+            </div>
+        </section>
 
+        <section class="panel followed-panel">
+            <div class="panel-head">
+                <div>
+                    <h2>Followed Stocks</h2>
+                    <p>Your tracked symbols appear here.</p>
+                </div>
+            </div>
+            <div id="followedStocksList" class="followed-list">
+                <div class="panel-empty">No followed stocks yet.</div>
+            </div>
+        </section>
+    </main>
 </div>
-<div id="stock">
 
+<div id="stock" class="stock-shell is-hidden">
+    <header class="stock-header">
+        <div class="stock-header-left">
+            <button id="backToHome" class="ghost-btn" type="button">Back Home</button>
+            <div>
+                <p class="eyebrow">Stock Detail</p>
+                <h1 id="stockTitle">Loading...</h1>
+                <p id="stockMeta" class="subtle"></p>
+            </div>
+        </div>
+        <div class="stock-header-actions">
+            <button id="detailFollowButton" class="ghost-btn" type="button">Follow</button>
+        </div>
+    </header>
+
+    <main class="stock-layout">
+        <section class="panel detail-overview">
+            <div class="detail-price-row">
+                <div>
+                    <span class="detail-label">Current Price</span>
+                    <strong id="detailPrice">Loading...</strong>
+                </div>
+                <div>
+                    <span class="detail-label">Change</span>
+                    <strong id="detailChange">Loading...</strong>
+                </div>
+            </div>
+            <div class="detail-stats-grid">
+                <article class="detail-stat-card">
+                    <span>Open</span>
+                    <strong id="detailOpen">-</strong>
+                </article>
+                <article class="detail-stat-card">
+                    <span>High</span>
+                    <strong id="detailHigh">-</strong>
+                </article>
+                <article class="detail-stat-card">
+                    <span>Low</span>
+                    <strong id="detailLow">-</strong>
+                </article>
+                <article class="detail-stat-card">
+                    <span>Prev Close</span>
+                    <strong id="detailPreviousClose">-</strong>
+                </article>
+            </div>
+        </section>
+
+        <section class="panel buy-panel">
+            <div class="panel-head">
+                <div>
+                    <h2>Buy Stock</h2>
+                    <p>Use your virtual balance to simulate a purchase.</p>
+                </div>
+            </div>
+            <form id="buyForm" class="buy-form" novalidate>
+                <label for="buyShares">Shares</label>
+                <input id="buyShares" type="number" min="1" step="1" value="1" required>
+                <button class="primary-btn" type="submit">Buy</button>
+                <p id="buyMessage" class="info-message is-hidden"></p>
+            </form>
+        </section>
+    </main>
 </div>
 
+<script>
+    const homeSection = document.getElementById('home');
+    const stockSection = document.getElementById('stock');
+    const accountBalance = document.getElementById('accountBalance');
+    const topStocksList = document.getElementById('topStocksList');
+    const followedStocksList = document.getElementById('followedStocksList');
+    const refreshOverview = document.getElementById('refreshOverview');
+    const backToHome = document.getElementById('backToHome');
+    const detailFollowButton = document.getElementById('detailFollowButton');
+    const buyForm = document.getElementById('buyForm');
+    const buyShares = document.getElementById('buyShares');
+    const buyMessage = document.getElementById('buyMessage');
+
+    let overviewState = { top_stocks: [], followed_stocks: [], balance: 0 };
+    let currentStock = null;
+
+    function formatMoney(value) {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD'
+        }).format(Number(value) || 0);
+    }
+
+    function formatPercent(value) {
+        const number = Number(value) || 0;
+        const prefix = number > 0 ? '+' : '';
+        return `${prefix}${number.toFixed(2)}%`;
+    }
+
+    function showHome() {
+        stockSection.classList.add('is-hidden');
+        homeSection.classList.remove('is-hidden');
+    }
+
+    function showStock() {
+        homeSection.classList.add('is-hidden');
+        stockSection.classList.remove('is-hidden');
+    }
+
+    function setInfoMessage(element, message, isError = false) {
+        element.textContent = message;
+        element.classList.remove('is-hidden');
+        element.classList.toggle('is-error', isError);
+    }
+
+    function renderTopStocks(stocks) {
+        if (!stocks.length) {
+            topStocksList.innerHTML = '<div class="panel-empty">Loading top stocks...</div>';
+            return;
+        }
+
+        topStocksList.innerHTML = '';
+        stocks.forEach((stock) => {
+            const row = document.createElement('div');
+            const changeClass = Number(stock.change) >= 0 ? 'is-up' : 'is-down';
+            row.className = `stock-row ${changeClass}`;
+            row.innerHTML = `
+                <button class="stock-link" type="button" data-symbol="${stock.symbol}">${stock.symbol}</button>
+                <span>${formatMoney(stock.price)}</span>
+                <span>${formatPercent(stock.percent_change)}</span>
+                <button class="ghost-btn follow-button" type="button" data-symbol="${stock.symbol}">
+                    ${stock.followed ? 'Following' : 'Follow'}
+                </button>
+            `;
+            topStocksList.appendChild(row);
+        });
+    }
+
+    function renderFollowedStocks(stocks) {
+        if (!stocks.length) {
+            followedStocksList.innerHTML = '<div class="panel-empty">No followed stocks yet.</div>';
+            return;
+        }
+
+        followedStocksList.innerHTML = '';
+        stocks.forEach((stock) => {
+            const item = document.createElement('div');
+            const changeClass = Number(stock.change) >= 0 ? 'is-up' : 'is-down';
+            item.className = `followed-item ${changeClass}`;
+            item.innerHTML = `
+                <div>
+                    <button class="stock-link" type="button" data-symbol="${stock.symbol}">${stock.symbol}</button>
+                    <p>${formatMoney(stock.price)}</p>
+                </div>
+                <span>${formatPercent(stock.percent_change)}</span>
+            `;
+            followedStocksList.appendChild(item);
+        });
+    }
+
+    function bindStockLinks() {
+        document.querySelectorAll('.stock-link').forEach((button) => {
+            button.onclick = () => loadStockDetail(button.dataset.symbol);
+        });
+        document.querySelectorAll('.follow-button').forEach((button) => {
+            button.onclick = () => toggleFollow(button.dataset.symbol);
+        });
+    }
+
+    async function loadOverview() {
+        topStocksList.innerHTML = '<div class="panel-empty">Loading top stocks...</div>';
+        followedStocksList.innerHTML = '<div class="panel-empty">Loading followed stocks...</div>';
+
+        const response = await fetch('/api/home/overview');
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+            topStocksList.innerHTML = '<div class="panel-empty">Unable to load market overview.</div>';
+            followedStocksList.innerHTML = '<div class="panel-empty">Unable to load followed stocks.</div>';
+            return;
+        }
+
+        overviewState = data;
+        accountBalance.textContent = formatMoney(data.balance);
+        renderTopStocks(data.top_stocks || []);
+        renderFollowedStocks(data.followed_stocks || []);
+        bindStockLinks();
+    }
+
+    async function toggleFollow(symbol) {
+        const isFollowed = (overviewState.followed_stocks || []).some((stock) => stock.symbol === symbol);
+        const response = await fetch('/api/follow', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ symbol, action: isFollowed ? 'unfollow' : 'follow' })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+            return;
+        }
+
+        if (currentStock && currentStock.symbol === symbol) {
+            currentStock.followed = data.followed;
+            detailFollowButton.textContent = data.followed ? 'Unfollow' : 'Follow';
+        }
+        await loadOverview();
+    }
+
+    async function loadStockDetail(symbol) {
+        const response = await fetch(`/getStockStats?symbol=${encodeURIComponent(symbol)}`);
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+            return;
+        }
+
+        currentStock = data.stock;
+        document.getElementById('stockTitle').textContent = `${data.stock.name} (${data.stock.symbol})`;
+        document.getElementById('stockMeta').textContent = `${data.stock.exchange} • ${data.stock.industry} • ${data.stock.country}`;
+        document.getElementById('detailPrice').textContent = formatMoney(data.stock.price);
+        document.getElementById('detailChange').textContent = `${data.stock.change >= 0 ? '+' : ''}${data.stock.change.toFixed(2)} / ${formatPercent(data.stock.percent_change)}`;
+        document.getElementById('detailChange').className = Number(data.stock.change) >= 0 ? 'detail-up' : 'detail-down';
+        document.getElementById('detailOpen').textContent = formatMoney(data.stock.open);
+        document.getElementById('detailHigh').textContent = formatMoney(data.stock.high);
+        document.getElementById('detailLow').textContent = formatMoney(data.stock.low);
+        document.getElementById('detailPreviousClose').textContent = formatMoney(data.stock.previous_close);
+        detailFollowButton.textContent = data.stock.followed ? 'Unfollow' : 'Follow';
+        accountBalance.textContent = formatMoney(data.balance);
+        buyMessage.classList.add('is-hidden');
+        showStock();
+    }
+
+    detailFollowButton.addEventListener('click', async () => {
+        if (!currentStock) {
+            return;
+        }
+        await toggleFollow(currentStock.symbol);
+        if (currentStock) {
+            detailFollowButton.textContent = currentStock.followed ? 'Unfollow' : 'Follow';
+        }
+    });
+
+    buyForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!currentStock) {
+            return;
+        }
+
+        const shares = Number(buyShares.value);
+        const response = await fetch('/api/buy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                symbol: currentStock.symbol,
+                shares,
+                price: currentStock.price
+            })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+            setInfoMessage(buyMessage, data.error || 'Unable to buy stock.', true);
+            return;
+        }
+
+        setInfoMessage(buyMessage, `${data.message} New balance: ${formatMoney(data.balance)}`);
+        accountBalance.textContent = formatMoney(data.balance);
+    });
+
+    refreshOverview.addEventListener('click', loadOverview);
+    backToHome.addEventListener('click', showHome);
+
+    loadOverview();
+</script>
 </body>
 </html>
