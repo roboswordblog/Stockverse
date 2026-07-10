@@ -341,4 +341,4 @@ def search_stock_list():
     return jsonify({"ok": True, "results": search_stocks(query)})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
