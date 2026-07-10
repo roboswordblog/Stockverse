@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stockverse Guide</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/guide.css', v=static_version('styles/guide.css')) }}">
+</head>
+<body>
+<div class="guide-shell">
+    <header class="guide-topbar">
+        <div class="topbar-brand">
+            <a class="brand-link" href="/">Stockverse</a>
+            <p>Guide</p>
+        </div>
+        <div class="topbar-actions">
+            {% if username %}
+            <a class="ghost-btn" href="/home">Trading Lab</a>
+            <a class="primary-btn" href="/home">Open Portfolio</a>
+            {% else %}
+            <a class="ghost-btn" href="/">Home</a>
+            <a class="ghost-btn" href="/#login">Log In</a>
+            <a class="primary-btn" href="/#signup">Sign Up</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <header class="guide-header">
+        <div>
+            <p class="eyebrow">Stockverse Guide</p>
+            <h1>Learn how stocks work in the real world, then use Stockverse to practice the process.</h1>
+            <p class="subtle">This is a full beginner guide, not just a short walkthrough. It covers how the market works, how investors evaluate companies, how risk should be managed, and how Stockverse can be used as a training environment.</p>
+        </div>
+        <div class="header-actions">
+            {% if username %}
+            <a class="ghost-btn" href="/home">Back to Trading Lab</a>
+            {% else %}
+            <a class="ghost-btn" href="/">Back Home</a>
+            {% endif %}
+            <button class="primary-btn" type="button" data-jump-step="0">Open Guide</button>
+        </div>
+    </header>
+
+    <main class="guide-main">
+        <aside class="guide-sidebar content-band progress-band">
+            <div class="progress-head">
+                <div>
+                    <p class="progress-label">Guide Index</p>
+                    <h2 id="guideStepTitle">Start here</h2>
+                </div>
+                <p id="guideStepCount" class="progress-count">Step 1 of 15</p>
+            </div>
+            <div class="sidebar-progress-wrap">
+                <div class="sidebar-progress-track" aria-hidden="true">
+                    <div id="guideProgressFill" class="sidebar-progress-fill"></div>
+                </div>
+                <p class="sidebar-progress-copy">Read it in order if you are new. The chapters follow the same sequence a disciplined investor should use before taking a position.</p>
+            </div>
+            <div class="step-pills" id="stepPills">
+                <button class="step-pill is-active" type="button" data-step="0">
+                    <span class="step-pill-index">01</span>
+                    <span class="step-pill-copy">
+                        <span class="step-pill-label">Start</span>
+                        <span class="step-pill-note">How to use this guide</span>
+                    </span>
+                </button>
+                <button class="step-pill" type="button" data-step="1">
+                    <span class="step-pill-index">02</span>
+                    <span class="step-pill-copy">
+                        <span class="step-pill-label">Market Basics</span>
+                        <span class="step-pill-note">What a stock is and why price moves</span>
+                    </span>
+                </button>
+                <button class="step-pill" type="button" data-step="2">
+                    <span class="step-pill-index">03</span>
+                    <span class="step-pill-copy">
+                        <span class="step-pill-label">Company Basics</span>
+                        <span class="step-pill-note">Market caps, sectors, and business quality</span>
+                    </span>
+                </button>
+                <button class="step-pill" type="button" data-step="3">
+                    <span class="step-pill-index">04</span>
+                    <span class="step-pill-copy">
+                        <span class="step-pill-label">Research</span>
+                        <span class="step-pill-note">How to study a company before buying</span>
+                    </span>
+                </button>
+                <button class="step-pill" type="button" data-step="4">
+                    <span class="step-pill-index">05</span>
+                    <span class="step-pill-copy">
+                        <span class="step-pill-label">Financials</span>
+                        <span class="step-pill-note">Core metrics beginners should understand</span>
+                    </span>
+                </button>
+                <button class="step-pill" type="button" data-step="5">
+                    <span class="step-pill-index">06</span>
+                    <span class="step-pill-copy">
+                        <span class="step-pill-label">Valuation</span>
+                        <span class="step-pill-note">Good company vs good stock price</span>
+                    </span>
+                </button>
+                <button class="step-pill" type="button" data-step="6">
+                    <span class="step-pill-index">07</span>
+                    <span class="step-pill-copy">
+                        <span class="step-pill-label">Quotes & Charts</span>
+                        <span class="step-pill-note">How to read the data on a stock page</span>
+                    </span>
+                </button>
+                <button class="step-pill" type="button" data-step="7">
+                    <span class="step-pill-index">08</span>
+                    <span class="step-pill-copy">
+                        <span class="step-pill-label">Risk</span>
+                        <span class="step-pill-note">Position sizing and loss control</span>
+                    </span>
+                </button>
+                <button class="step-pill" type="button" data-step="8">
+                    <span class="step-pill-index">09</span>
+                    <span class="step-pill-copy">
+                        <span class="step-pill-label">Portfolio</span>
+                        <span class="step-pill-note">Diversification and watchlist structure</span>
+                    </span>
+                </button>
+                <button class="step-pill" type="button" data-step="9">
+                    <span class="step-pill-index">10</span>
+                    <span class="step-pill-copy">
+                        <span class="step-pill-label">Execution</span>
+                        <span class="step-pill-note">Orders, timing, and patience</span>
+                    </span>
+                </button>
+                <button class="step-pill" type="button" data-step="10">
+                    <span class="step-pill-index">11</span>
+                    <span class="step-pill-copy">
+                        <span class="step-pill-label">Psychology</span>
+                        <span class="step-pill-note">Mistakes beginners make repeatedly</span>
+                    </span>
+                </button>
+                <button class="step-pill" type="button" data-step="11">
+                    <span class="step-pill-index">12</span>
+                    <span class="step-pill-copy">
+                        <span class="step-pill-label">Workflow</span>
+                        <span class="step-pill-note">A real-world investor routine</span>
+                    </span>
+                </button>
+                <button class="step-pill" type="button" data-step="12">
+                    <span class="step-pill-index">13</span>
+                    <span class="step-pill-copy">
+                        <span class="step-pill-label">Using Stockverse</span>
+                        <span class="step-pill-note">How the app maps to the process</span>
+                    </span>
+                </button>
+                <button class="step-pill" type="button" data-step="13">
+                    <span class="step-pill-index">14</span>
+                    <span class="step-pill-copy">
+                        <span class="step-pill-label">Glossary</span>
+                        <span class="step-pill-note">Terms and reminders worth memorizing</span>
+                    </span>
+                </button>
+                <button class="step-pill" type="button" data-step="14">
+                    <span class="step-pill-index">15</span>
+                    <span class="step-pill-copy">
+                        <span class="step-pill-label">Quiz</span>
+                        <span class="step-pill-note">Check whether the concepts actually stuck</span>
+                    </span>
+                </button>
+            </div>
+        </aside>
+
+        <div class="guide-content">
+            <section class="guide-step content-band is-active" data-step-title="Start here">
+                <div class="section-heading">
+                    <h2>How to use this guide</h2>
+                    <p>This guide is built to be read like documentation. You can jump around, but beginners should go in sequence because each chapter depends on the previous one.</p>
+                </div>
+                <div class="quick-nav-grid">
+                    <button class="quick-nav-card" type="button" data-jump-step="1">
+                        <span class="quick-step">A</span>
+                        <h3>Learn the market first</h3>
+                        <p>Start with what a stock is, what a market does, and why price changes.</p>
+                    </button>
+                    <button class="quick-nav-card" type="button" data-jump-step="3">
+                        <span class="quick-step">B</span>
+                        <h3>Learn how to research</h3>
+                        <p>Understand the company before you think about buying the symbol.</p>
+                    </button>
+                    <button class="quick-nav-card" type="button" data-jump-step="7">
+                        <span class="quick-step">C</span>
+                        <h3>Learn to manage risk</h3>
+                        <p>Controlling position size matters more than being right every time.</p>
+                    </button>
+                    <button class="quick-nav-card" type="button" data-jump-step="12">
+                        <span class="quick-step">D</span>
+                        <h3>Practice inside Stockverse</h3>
+                        <p>Use the app as a training environment after each concept is clear.</p>
+                    </button>
+                </div>
+                <section class="hero-band">
+                    <div class="hero-copy">
+                        <h2>The right beginner mindset</h2>
+                        <p>Most people start with symbols. Strong learners start with process. The better order is: understand the business, define the reason the stock matters now, understand risk, decide timeframe, then place the trade.</p>
+                        <p>You do not need to know everything to begin. You do need a repeatable process and enough discipline to follow it.</p>
+                    </div>
+                    <div class="hero-checklist">
+                        <h3>Use this loop</h3>
+                        <ul class="checklist">
+                            <li>Read one chapter.</li>
+                            <li>Open Stockverse and apply it to one real symbol.</li>
+                            <li>Write down what you noticed.</li>
+                            <li>Move to the next chapter only after the last one makes sense.</li>
+                        </ul>
+                    </div>
+                </section>
+                <section class="content-band nested-band">
+                    <div class="lesson-grid">
+                        <article class="lesson-card">
+                            <h3>If you have 20 minutes</h3>
+                            <p>Read Market Basics, Quotes and Charts, Risk, and Using Stockverse. That is the minimum useful foundation.</p>
+                        </article>
+                        <article class="lesson-card">
+                            <h3>If you have 1 hour</h3>
+                            <p>Read through Workflow as well. That gives you a real-world routine, not just definitions.</p>
+                        </article>
+                        <article class="lesson-card">
+                            <h3>If you want the full path</h3>
+                            <p>Read the entire guide, take the quiz, then spend a week practicing inside Stockverse with small simulated positions.</p>
+                        </article>
+                    </div>
+                </section>
+                <section class="content-band nested-band">
+                    <div class="section-heading">
+                        <h2>What this guide is trying to build</h2>
+                        <p>The goal is not to turn you into an expert overnight. The goal is to give you a framework that is stable enough to survive real market noise.</p>
+                    </div>
+                    <div class="split-band">
+                        <div>
+                            <ul class="checklist">
+                                <li>Understand what a stock represents.</li>
+                                <li>Understand how to evaluate a company at a basic level.</li>
+                                <li>Understand how to control losses before chasing gains.</li>
+                                <li>Understand how Stockverse can be used as practice instead of entertainment.</li>
+                            </ul>
+                        </div>
+                        <div class="example-card">
+                            <h3>What this guide will not do</h3>
+                            <p>It will not give you guaranteed picks, perfect timing, or shortcuts around uncertainty. It is a process guide, because process is what lasts.</p>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section class="guide-step content-band" data-step-title="Market basics">
+                <div class="section-heading">
+                    <h2>What a stock market actually does</h2>
+                    <p>The market is where people buy and sell ownership in businesses. Price is the meeting point between what buyers are willing to pay and what sellers are willing to accept.</p>
+                </div>
+                <div class="lesson-grid">
+                    <article class="lesson-card">
+                        <h3>Stock</h3>
+                        <p>A stock is a slice of ownership in a company. If the company grows profits and investors value those profits more highly, the stock price can rise.</p>
+                    </article>
+                    <article class="lesson-card">
+                        <h3>Exchange</h3>
+                        <p>An exchange is the market venue where the shares trade. You do not need to master market plumbing to begin, but you should know that pricing comes from an active marketplace.</p>
+                    </article>
+                    <article class="lesson-card">
+                        <h3>Supply and demand</h3>
+                        <p>Price rises when demand exceeds supply at the current level. Price falls when sellers are more aggressive than buyers.</p>
+                    </article>
+                    <article class="lesson-card">
+                        <h3>Expectations</h3>
+                        <p>Stocks move on expectations, not only on current facts. A company can report good results and still fall if the market expected even more.</p>
+                    </article>
+                </div>
+                <div class="signal-grid secondary-heading">
+                    <article class="signal-card">
+                        <span class="signal-label">Indexes</span>
+                        <p>Indexes like the S&P 500 track groups of stocks and give context for how the broader market is behaving.</p>
+                    </article>
+                    <article class="signal-card">
+                        <span class="signal-label">Sectors</span>
+                        <p>Technology, healthcare, financials, energy, and consumer names often move in groups when sector-specific news hits.</p>
+                    </article>
+                    <article class="signal-card">
+                        <span class="signal-label">Dividends</span>
+                        <p>Some companies return cash to shareholders. Dividends matter more for income-focused investors than for high-growth traders.</p>
+                    </article>
+                    <article class="signal-card">
+                        <span class="signal-label">Volatility</span>
+                        <p>Strong companies can still drop hard for weeks. Short-term price moves are not the same thing as business quality.</p>
+                    </article>
+                </div>
+                <div class="doc-note secondary-heading">
+                    <strong>Key idea:</strong> a stock price is not a score for how “good” a company is. It is a live negotiation between future expectations, current information, and investor emotion.
+                </div>
+                <section class="content-band nested-band">
+                    <div class="section-heading">
+                        <h2>What actually moves markets day to day</h2>
+                        <p>Beginners often assume price movement always comes from one company-specific story. In reality, the broader environment can move almost everything at once.</p>
+                    </div>
+                    <div class="workflow-grid">
+                        <article class="workflow-card">
+                            <h3>Economic data</h3>
+                            <p>Inflation, employment, and growth data can change how investors think about the economy and future interest rates.</p>
+                        </article>
+                        <article class="workflow-card">
+                            <h3>Interest rates</h3>
+                            <p>Higher rates often put pressure on expensive growth names because future profits become less attractive when money is more expensive.</p>
+                        </article>
+                        <article class="workflow-card">
+                            <h3>Earnings season</h3>
+                            <p>Company reports can reset expectations very quickly, especially when guidance changes.</p>
+                        </article>
+                        <article class="workflow-card">
+                            <h3>Market mood</h3>
+                            <p>Sometimes risk appetite is strong and buyers are aggressive. Sometimes investors get defensive and even solid names sell off.</p>
+                        </article>
+                    </div>
+                </section>
+            </section>
+
+            <section class="guide-step content-band" data-step-title="Company basics">
+                <div class="section-heading">
+                    <h2>How to think about a company before you think about its chart</h2>
+                    <p>Beginners often jump straight to price. A better starting point is asking what the business actually does and how durable that business might be.</p>
+                </div>
+                <div class="lesson-grid">
+                    <article class="lesson-card">
+                        <h3>Business model</h3>
+                        <p>What does the company sell? Who pays for it? Why do those customers keep paying?</p>
+                    </article>
+                    <article class="lesson-card">
+                        <h3>Market cap</h3>
+                        <p>Large companies are usually more stable. Smaller companies can grow faster, but they often move more violently and carry more risk.</p>
+                    </article>
+                    <article class="lesson-card">
+                        <h3>Moat</h3>
+                        <p>A moat is the advantage that makes a company hard to copy: brand strength, switching costs, scale, network effects, or proprietary technology.</p>
+                    </article>
+                    <article class="lesson-card">
+                        <h3>Cycle sensitivity</h3>
+                        <p>Some businesses are stable across most environments. Others depend heavily on consumer spending, commodity prices, or interest rates.</p>
+                    </article>
+                </div>
+                <div class="split-band secondary-heading">
+                    <div class="example-card">
+                        <h3>Beginner-friendly starting point</h3>
+                        <p>Start with companies you can explain in one clear sentence. If you cannot explain what the business sells or why it matters, you are too early to put money behind the idea.</p>
+                    </div>
+                    <div class="example-card">
+                        <h3>Common mistake</h3>
+                        <p>Buying a symbol because it is trending on social media without knowing the business model. That produces random exposure, not informed investing.</p>
+                    </div>
+                </div>
+                <section class="content-band nested-band">
+                    <div class="section-heading">
+                        <h2>Three company questions to ask every time</h2>
+                    </div>
+                    <ol class="ordered-list">
+                        <li>What problem does this company solve, and why do customers choose it?</li>
+                        <li>What could make customers stop choosing it over the next few years?</li>
+                        <li>Does the business seem easier or harder to compete with than it did a year ago?</li>
+                    </ol>
+                    <div class="doc-note secondary-heading">
+                        <strong>Good habit:</strong> if you cannot answer those questions without using buzzwords, your understanding is still too shallow for conviction.
+                    </div>
+                </section>
+            </section>
+
+            <section class="guide-step content-band" data-step-title="Research">
+                <div class="section-heading">
+                    <h2>What to research before you buy a stock</h2>
+                    <p>You do not need institutional-grade analysis to begin. You do need a repeatable checklist that prevents impulsive decisions.</p>
+                </div>
+                <div class="signal-grid">
+                    <article class="signal-card">
+                        <span class="signal-label">Business summary</span>
+                        <p>Write down what the company does in plain language. If the description is vague, your research is still too shallow.</p>
+                    </article>
+                    <article class="signal-card">
+                        <span class="signal-label">Revenue trend</span>
+                        <p>Are sales rising, flat, or falling? Revenue tells you whether demand for the business is expanding or shrinking.</p>
+                    </article>
+                    <article class="signal-card">
+                        <span class="signal-label">Earnings quality</span>
+                        <p>Look for whether profits are stable and whether management can explain how they will improve.</p>
+                    </article>
+                    <article class="signal-card">
+                        <span class="signal-label">Catalysts</span>
+                        <p>Earnings, product launches, regulation, acquisitions, and macro shifts can all change what investors expect next.</p>
+                    </article>
+                    <article class="signal-card">
+                        <span class="signal-label">Risks</span>
+                        <p>Debt load, concentration risk, strong competitors, margin compression, and weak leadership all matter.</p>
+                    </article>
+                    <article class="signal-card">
+                        <span class="signal-label">Management</span>
+                        <p>Leadership quality matters. Investors back not only a business but also the people making capital allocation decisions.</p>
+                    </article>
+                </div>
+                <section class="content-band nested-band">
+                    <div class="section-heading">
+                        <h2>Starter research checklist</h2>
+                    </div>
+                    <ol class="ordered-list">
+                        <li>Write a one-sentence business description.</li>
+                        <li>Write the reason the stock is interesting now.</li>
+                        <li>List two risks that could hurt the thesis.</li>
+                        <li>Decide what would make you wrong.</li>
+                        <li>Decide whether you still understand the trade after writing all of that down.</li>
+                    </ol>
+                </section>
+                <section class="content-band nested-band">
+                    <div class="section-heading">
+                        <h2>Sources worth trusting more than noise</h2>
+                        <p>As you go beyond the guide, the quality of your source material matters. Strong source discipline is part of strong investing discipline.</p>
+                    </div>
+                    <div class="lesson-grid">
+                        <article class="lesson-card">
+                            <h3>Company materials</h3>
+                            <p>Investor presentations, earnings calls, and official company updates are direct. They are biased in the company’s favor, but they are still primary material.</p>
+                        </article>
+                        <article class="lesson-card">
+                            <h3>Financial statements</h3>
+                            <p>Statements force you to look at evidence instead of stories. They slow down bad assumptions.</p>
+                        </article>
+                        <article class="lesson-card">
+                            <h3>Competitor comparison</h3>
+                            <p>One company rarely makes sense in isolation. Comparing it against peers sharpens your view of what is special and what is ordinary.</p>
+                        </article>
+                        <article class="lesson-card">
+                            <h3>User experience</h3>
+                            <p>If the company sells a product or service people interact with, understanding how real customers use it can make your thesis less abstract.</p>
+                        </article>
+                    </div>
+                </section>
+            </section>
+
+            <section class="guide-step content-band" data-step-title="Financials">
+                <div class="section-heading">
+                    <h2>Financial statements and metrics beginners should know</h2>
+                    <p>You do not need to be an accountant, but you should recognize the main numbers that describe business health.</p>
+                </div>
+                <div class="lesson-grid">
+                    <article class="lesson-card">
+                        <h3>Revenue</h3>
+                        <p>The top line. It shows how much money the company brought in from selling its products or services.</p>
+                    </article>
+                    <article class="lesson-card">
+                        <h3>Operating income</h3>
+                        <p>A measure of how profitable the core business is before certain non-operating items.</p>
+                    </article>
+                    <article class="lesson-card">
+                        <h3>Earnings per share</h3>
+                        <p>Profit allocated per share. It is widely watched, especially around earnings season.</p>
+                    </article>
+                    <article class="lesson-card">
+                        <h3>Free cash flow</h3>
+                        <p>Cash left after the business pays for the spending needed to keep operating. Cash flow often exposes whether profits are truly strong.</p>
+                    </article>
+                </div>
+                <div class="signal-grid secondary-heading">
+                    <article class="signal-card">
+                        <span class="signal-label">Gross margin</span>
+                        <p>How much money remains after the direct cost of making the product or delivering the service.</p>
+                    </article>
+                    <article class="signal-card">
+                        <span class="signal-label">Debt</span>
+                        <p>Debt is not automatically bad, but high debt can make a business fragile if conditions worsen.</p>
+                    </article>
+                    <article class="signal-card">
+                        <span class="signal-label">P/E ratio</span>
+                        <p>Price relative to earnings. Useful, but only when earnings are stable and meaningful for the business.</p>
+                    </article>
+                    <article class="signal-card">
+                        <span class="signal-label">P/S ratio</span>
+                        <p>Price relative to sales. Often used for companies where profits are still small or inconsistent.</p>
+                    </article>
+                </div>
+                <div class="doc-note secondary-heading">
+                    <strong>Beginner rule:</strong> never use one metric alone. A low P/E is not enough, high revenue growth is not enough, and a strong chart is not enough. Good decisions come from combining business quality, financial direction, and price context.
+                </div>
+                <section class="content-band nested-band">
+                    <div class="section-heading">
+                        <h2>How to read numbers without getting lost</h2>
+                    </div>
+                    <div class="split-band">
+                        <div>
+                            <ol class="ordered-list">
+                                <li>Start with revenue: is demand growing?</li>
+                                <li>Then check margins: is growth turning into quality profit?</li>
+                                <li>Then check cash flow: does the business actually produce cash?</li>
+                                <li>Then check debt: how fragile would the company be if conditions worsened?</li>
+                            </ol>
+                        </div>
+                        <div class="example-card">
+                            <h3>Why beginners get stuck here</h3>
+                            <p>The numbers feel technical, so many people skip them entirely. That creates a research process with no anchor. You do not need mastery. You need familiarity and repetition.</p>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section class="guide-step content-band" data-step-title="Valuation">
+                <div class="section-heading">
+                    <h2>Valuation: a good company can still be a bad buy</h2>
+                    <p>One of the most important concepts in stocks is that the business and the stock are related, but not identical. A great company can trade at an unrealistic price. A mediocre company can sometimes look attractive if expectations are too low.</p>
+                </div>
+                <div class="split-band">
+                    <div class="example-card">
+                        <h3>What valuation asks</h3>
+                        <p>How much are investors paying today for the company’s future profits, growth, and durability?</p>
+                    </div>
+                    <div class="example-card">
+                        <h3>Why it matters</h3>
+                        <p>If expectations are too high, the stock can fall even when the company keeps performing well.</p>
+                    </div>
+                </div>
+                <div class="workflow-grid secondary-heading">
+                    <article class="workflow-card">
+                        <h3>Cheap does not mean good</h3>
+                        <p>Some stocks look cheap because the business is deteriorating and investors expect worse results ahead.</p>
+                    </article>
+                    <article class="workflow-card">
+                        <h3>Expensive does not mean bad</h3>
+                        <p>Some companies deserve premium valuations because growth, margins, and competitive advantages are unusually strong.</p>
+                    </article>
+                    <article class="workflow-card">
+                        <h3>Expectations drive reactions</h3>
+                        <p>The market mostly reacts to what changed relative to expectation, not to whether the raw number sounds impressive in isolation.</p>
+                    </article>
+                    <article class="workflow-card">
+                        <h3>Passing is a real decision</h3>
+                        <p>You do not need to force a trade. If you do not understand the valuation or the setup feels crowded, stepping aside is often the better move.</p>
+                    </article>
+                </div>
+                <section class="content-band nested-band">
+                    <div class="section-heading">
+                        <h2>Ways to think about valuation without overcomplicating it</h2>
+                    </div>
+                    <div class="lesson-grid">
+                        <article class="lesson-card">
+                            <h3>Compare to its own history</h3>
+                            <p>If a stock usually trades at one kind of multiple and now trades far above it, ask what changed and whether it is durable.</p>
+                        </article>
+                        <article class="lesson-card">
+                            <h3>Compare to peers</h3>
+                            <p>If similar businesses are much cheaper or much more expensive, that gap usually reflects some difference in expectations.</p>
+                        </article>
+                        <article class="lesson-card">
+                            <h3>Compare to growth</h3>
+                            <p>A premium price can make sense if the business is growing much faster and more reliably than alternatives.</p>
+                        </article>
+                        <article class="lesson-card">
+                            <h3>Respect uncertainty</h3>
+                            <p>If you cannot explain why the valuation is justified, that uncertainty is information, not a weakness to hide from.</p>
+                        </article>
+                    </div>
+                </section>
+            </section>
+
+            <section class="guide-step content-band" data-step-title="Quotes & charts">
+                <div class="section-heading">
+                    <h2>How to read the information on a stock page</h2>
+                    <p>Quote fields and charts are useful only when you understand what each number is trying to tell you.</p>
+                </div>
+                <div class="signal-grid">
+                    <article class="signal-card">
+                        <span class="signal-label">Current Price</span>
+                        <p>The latest traded price. In Stockverse, this is the value used for buy and sell actions.</p>
+                    </article>
+                    <article class="signal-card">
+                        <span class="signal-label">Daily Change</span>
+                        <p>The stock’s move versus the previous close. It tells you whether the current session is positive or negative so far.</p>
+                    </article>
+                    <article class="signal-card">
+                        <span class="signal-label">Open, High, Low</span>
+                        <p>These show the session range. A narrow range often means balance. A wide range often means stress, momentum, or uncertainty.</p>
+                    </article>
+                    <article class="signal-card">
+                        <span class="signal-label">Position Data</span>
+                        <p>Shares, average cost, current value, and unrealized P/L tell you how your own trade is behaving, not just the stock by itself.</p>
+                    </article>
+                </div>
+                <div class="lesson-grid secondary-heading">
+                    <article class="lesson-card">
+                        <h3>1D chart</h3>
+                        <p>Best for short-term context. Useful when you want to see how the stock behaved during the session.</p>
+                    </article>
+                    <article class="lesson-card">
+                        <h3>1W chart</h3>
+                        <p>Useful for spotting whether the recent move is part of a larger trend or just one sharp day.</p>
+                    </article>
+                    <article class="lesson-card">
+                        <h3>1M chart</h3>
+                        <p>Useful for judging whether the trade still fits the original idea over a slightly broader window.</p>
+                    </article>
+                    <article class="lesson-card">
+                        <h3>Chart discipline</h3>
+                        <p>Do not make a full investment decision from one candle or one chart shape. Combine chart context with business and risk context.</p>
+                    </article>
+                </div>
+                <section class="content-band nested-band">
+                    <div class="section-heading">
+                        <h2>What charts can and cannot tell you</h2>
+                    </div>
+                    <div class="split-band">
+                        <div>
+                            <ul class="checklist">
+                                <li>Charts can show trend, momentum, hesitation, and volatility.</li>
+                                <li>Charts can help you judge whether an entry is calm or extended.</li>
+                                <li>Charts can show how the market is reacting right now.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <ul class="checklist warning-list">
+                                <li>Charts cannot tell you whether management is strong.</li>
+                                <li>Charts cannot replace research into the business itself.</li>
+                                <li>Charts cannot make risk management optional.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section class="guide-step content-band" data-step-title="Risk">
+                <div class="section-heading">
+                    <h2>Risk management and position sizing</h2>
+                    <p>Risk control is the difference between learning steadily and blowing up early. Good investors stay in the game long enough for skill to compound.</p>
+                </div>
+                <div class="split-band">
+                    <div>
+                        <div class="section-heading">
+                            <h2>Core rules</h2>
+                        </div>
+                        <ul class="checklist">
+                            <li>Never let one idea dominate your account.</li>
+                            <li>Define what would prove you wrong before you enter.</li>
+                            <li>Do not add to a loser automatically just because it fell.</li>
+                            <li>Keep cash available so every decision is not forced.</li>
+                            <li>Risk small enough that you can think clearly during drawdowns.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="section-heading">
+                            <h2>Starter sizing example</h2>
+                        </div>
+                        <div class="example-card">
+                            <p><strong>Account:</strong> 1000 USD</p>
+                            <p><strong>Starter position:</strong> 100 to 150 USD</p>
+                            <p><strong>Reason:</strong> one mistake hurts, but it does not own the whole account.</p>
+                            <p><strong>Stockverse use:</strong> practice this discipline until it feels normal, not restrictive.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="doc-note secondary-heading">
+                    <strong>Important:</strong> beginners usually spend too much time trying to predict upside and too little time defining downside. Reverse that habit.
+                </div>
+                <section class="content-band nested-band">
+                    <div class="section-heading">
+                        <h2>Simple journal prompts for every trade</h2>
+                    </div>
+                    <div class="lesson-grid">
+                        <article class="lesson-card">
+                            <h3>Before entry</h3>
+                            <p>Why am I taking this trade, what is my size, and what would make me admit I am wrong?</p>
+                        </article>
+                        <article class="lesson-card">
+                            <h3>During the trade</h3>
+                            <p>Is price behavior matching the original thesis, or am I starting to invent a new story because I am uncomfortable?</p>
+                        </article>
+                        <article class="lesson-card">
+                            <h3>After exit</h3>
+                            <p>Was the process disciplined? Would I take the same trade again with the same information?</p>
+                        </article>
+                    </div>
+                </section>
+            </section>
+
+            <section class="guide-step content-band" data-step-title="Portfolio">
+                <div class="section-heading">
+                    <h2>Portfolio construction and diversification</h2>
+                    <p>Owning multiple stocks is not automatically diversification. What matters is whether your risks are actually spread out.</p>
+                </div>
+                <div class="lesson-grid">
+                    <article class="lesson-card">
+                        <h3>Diversification</h3>
+                        <p>Owning different businesses so one mistake or one sector shock does not define everything.</p>
+                    </article>
+                    <article class="lesson-card">
+                        <h3>Concentration</h3>
+                        <p>Higher conviction can justify larger size, but concentration raises the cost of being wrong.</p>
+                    </article>
+                    <article class="lesson-card">
+                        <h3>Correlation</h3>
+                        <p>Five stocks in the same theme can still move together. That is not as diversified as it looks.</p>
+                    </article>
+                    <article class="lesson-card">
+                        <h3>Cash is a position</h3>
+                        <p>Staying partially in cash is a valid choice when opportunities are weak or your process feels unclear.</p>
+                    </article>
+                </div>
+                <section class="content-band nested-band">
+                    <div class="section-heading">
+                        <h2>Simple beginner structure</h2>
+                    </div>
+                    <ul class="checklist">
+                        <li>Keep a short watchlist of companies you understand.</li>
+                        <li>Limit how many new positions you open in one day.</li>
+                        <li>Spread exposure across different sectors when possible.</li>
+                        <li>Review whether each position still has a reason to remain in the account.</li>
+                    </ul>
+                </section>
+                <section class="content-band nested-band">
+                    <div class="section-heading">
+                        <h2>How to keep a watchlist useful</h2>
+                    </div>
+                    <div class="workflow-grid">
+                        <article class="workflow-card">
+                            <h3>Keep it small</h3>
+                            <p>A short list of understandable names beats a giant pile of random tickers you never revisit properly.</p>
+                        </article>
+                        <article class="workflow-card">
+                            <h3>Group by reason</h3>
+                            <p>Know whether a symbol is on the list for long-term quality, a short-term setup, earnings interest, or sector monitoring.</p>
+                        </article>
+                        <article class="workflow-card">
+                            <h3>Remove dead ideas</h3>
+                            <p>If the reason you cared is gone, delete it. A watchlist should help decisions, not preserve clutter.</p>
+                        </article>
+                        <article class="workflow-card">
+                            <h3>Review regularly</h3>
+                            <p>Revisit the list after market-moving events so it stays connected to reality.</p>
+                        </article>
+                    </div>
+                </section>
+            </section>
+
+            <section class="guide-step content-band" data-step-title="Execution">
+                <div class="section-heading">
+                    <h2>Orders, execution, and patience</h2>
+                    <p>A good thesis can still be harmed by bad execution. Timing is not everything, but execution discipline still matters.</p>
+                </div>
+                <div class="signal-grid">
+                    <article class="signal-card">
+                        <span class="signal-label">Market order</span>
+                        <p>An order to buy or sell at the best available price. Fast, but the exact fill can move around in a real market.</p>
+                    </article>
+                    <article class="signal-card">
+                        <span class="signal-label">Limit order</span>
+                        <p>An order that executes only at your chosen price or better. More control, but there is no guarantee it fills.</p>
+                    </article>
+                    <article class="signal-card">
+                        <span class="signal-label">Patience</span>
+                        <p>Not every move needs to be chased. Missing a rushed entry is often better than forcing a bad one.</p>
+                    </article>
+                    <article class="signal-card">
+                        <span class="signal-label">Stockverse note</span>
+                        <p>Stockverse keeps execution simple so you can focus on process. Real markets add frictions such as slippage and spreads.</p>
+                    </article>
+                </div>
+                <div class="doc-note secondary-heading">
+                    <strong>Practical lesson:</strong> the more emotional your entry feels, the more likely you are reacting instead of executing a plan.
+                </div>
+                <section class="content-band nested-band">
+                    <div class="section-heading">
+                        <h2>Before you press buy</h2>
+                    </div>
+                    <ol class="ordered-list">
+                        <li>Confirm the reason for the trade in one sentence.</li>
+                        <li>Confirm your size before price moves again.</li>
+                        <li>Check whether the move already feels overextended for your timeframe.</li>
+                        <li>Decide whether you are entering because of a plan or because you feel rushed.</li>
+                    </ol>
+                </section>
+            </section>
+
+            <section class="guide-step content-band" data-step-title="Psychology">
+                <div class="section-heading">
+                    <h2>Psychology and the mistakes beginners repeat</h2>
+                    <p>Most bad trades are not caused by missing information. They come from poor behavior under uncertainty.</p>
+                </div>
+                <div class="workflow-grid">
+                    <article class="workflow-card">
+                        <h3>FOMO</h3>
+                        <p>Buying because the stock already moved and you feel left behind. FOMO turns other people’s conviction into your rushed entry.</p>
+                    </article>
+                    <article class="workflow-card">
+                        <h3>Revenge trading</h3>
+                        <p>Trying to win back a loss immediately instead of resetting and re-evaluating the process.</p>
+                    </article>
+                    <article class="workflow-card">
+                        <h3>Thesis drift</h3>
+                        <p>Changing the reason for the trade after the trade is already going badly.</p>
+                    </article>
+                    <article class="workflow-card">
+                        <h3>Overconfidence</h3>
+                        <p>One good trade does not prove expertise. Skill is measured across many decisions and many market conditions.</p>
+                    </article>
+                </div>
+                <section class="content-band nested-band">
+                    <div class="section-heading">
+                        <h2>How to reduce those mistakes</h2>
+                    </div>
+                    <ol class="ordered-list">
+                        <li>Write your reason for entering before you click buy.</li>
+                        <li>Write what would make you wrong.</li>
+                        <li>Keep your first size small enough that emotion stays manageable.</li>
+                        <li>Review whether you followed your plan, not just whether the trade made money.</li>
+                    </ol>
+                </section>
+                <section class="content-band nested-band">
+                    <div class="section-heading">
+                        <h2>Warning signs you are getting emotional</h2>
+                    </div>
+                    <div class="signal-grid">
+                        <article class="signal-card">
+                            <span class="signal-label">You keep checking price</span>
+                            <p>Constant checking usually means your size is too large or your thesis is too vague.</p>
+                        </article>
+                        <article class="signal-card">
+                            <span class="signal-label">You want to “make it back”</span>
+                            <p>That mindset turns the next trade into therapy instead of decision-making.</p>
+                        </article>
+                        <article class="signal-card">
+                            <span class="signal-label">You changed the plan mid-trade</span>
+                            <p>If the trade went from short-term idea to long-term “investment” only after it dropped, that is usually denial.</p>
+                        </article>
+                        <article class="signal-card">
+                            <span class="signal-label">You copied someone else</span>
+                            <p>If you cannot explain the setup without referencing another person, the conviction is not really yours.</p>
+                        </article>
+                    </div>
+                </section>
+            </section>
+
+            <section class="guide-step content-band" data-step-title="Workflow">
+                <div class="section-heading">
+                    <h2>A real-world stock workflow</h2>
+                    <p>This routine is simple on purpose. Beginners do better with a clean repeatable system than with ten disconnected indicators.</p>
+                </div>
+                <div class="workflow-grid">
+                    <article class="workflow-card">
+                        <h3>1. Build a watchlist</h3>
+                        <p>Collect companies you understand or want to understand better. A watchlist is a research queue, not a buy list.</p>
+                    </article>
+                    <article class="workflow-card">
+                        <h3>2. Check the context</h3>
+                        <p>Look at the broader market, the sector, and recent news. Good ideas behave differently in strong and weak environments.</p>
+                    </article>
+                    <article class="workflow-card">
+                        <h3>3. Form a thesis</h3>
+                        <p>Write why the stock matters, what might drive it, and what would invalidate the setup.</p>
+                    </article>
+                    <article class="workflow-card">
+                        <h3>4. Size deliberately</h3>
+                        <p>Decide your exposure before entering, not after the stock moves against you.</p>
+                    </article>
+                    <article class="workflow-card">
+                        <h3>5. Review after entry</h3>
+                        <p>Check whether the trade is behaving as expected and whether new information changed the thesis.</p>
+                    </article>
+                    <article class="workflow-card">
+                        <h3>6. Review after exit</h3>
+                        <p>Winning trades can still be poorly executed. Losing trades can still be well reasoned. Review process first.</p>
+                    </article>
+                </div>
+                <section class="content-band nested-band">
+                    <div class="section-heading">
+                        <h2>Suggested routine by time horizon</h2>
+                    </div>
+                    <div class="split-band">
+                        <div class="example-card">
+                            <h3>Daily routine</h3>
+                            <p>Check your watchlist, scan market tone, review open positions, and write down any symbols that now require more research.</p>
+                        </div>
+                        <div class="example-card">
+                            <h3>Weekly routine</h3>
+                            <p>Review winners and losers, remove stale watchlist names, and check whether your portfolio has drifted into too much concentration.</p>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section class="guide-step content-band" data-step-title="Using Stockverse">
+                <div class="section-heading">
+                    <h2>How Stockverse fits into the learning process</h2>
+                    <p>Stockverse is most useful when you treat it like a training environment for process, not as a replacement for real-world judgment.</p>
+                </div>
+                <div class="lesson-grid">
+                    <article class="lesson-card">
+                        <h3>Market Home</h3>
+                        <p>Use the home page to watch broad price changes, compare leading symbols, and keep a short list of names worth deeper work.</p>
+                    </article>
+                    <article class="lesson-card">
+                        <h3>Stock Page</h3>
+                        <p>Open a symbol to review price, chart history, your current position, and whether the trade still matches your original thesis.</p>
+                    </article>
+                    <article class="lesson-card">
+                        <h3>Followed Stocks</h3>
+                        <p>Use the follow list as a serious watchlist. Put only names there that you intend to revisit.</p>
+                    </article>
+                    <article class="lesson-card">
+                        <h3>Bought Stocks</h3>
+                        <p>Use your active positions view to monitor average cost, current value, and unrealized P/L without guessing.</p>
+                    </article>
+                    <article class="lesson-card">
+                        <h3>Leaderboard</h3>
+                        <p>Use it to compare discipline and consistency, not as pressure to swing harder for short-term rank.</p>
+                    </article>
+                    <article class="lesson-card">
+                        <h3>Guide</h3>
+                        <p>The guide should stay open while you practice. The fastest way to learn is to move from concept to application immediately.</p>
+                    </article>
+                </div>
+                <section class="content-band nested-band">
+                    <div class="section-heading">
+                        <h2>What Stockverse teaches well</h2>
+                    </div>
+                    <ul class="checklist">
+                        <li>Reading quotes and charts without panic.</li>
+                        <li>Practicing small position sizes repeatedly.</li>
+                        <li>Tracking whether your thesis survived price movement.</li>
+                        <li>Comparing your process against other users without risking real money.</li>
+                    </ul>
+                </section>
+                <section class="content-band nested-band">
+                    <div class="section-heading">
+                        <h2>A practical Stockverse training plan</h2>
+                    </div>
+                    <div class="workflow-grid">
+                        <article class="workflow-card">
+                            <h3>Day 1-2</h3>
+                            <p>Only follow stocks and open their pages. Do not buy immediately. Practice reading quotes, charts, and the guide together.</p>
+                        </article>
+                        <article class="workflow-card">
+                            <h3>Day 3-4</h3>
+                            <p>Open very small simulated positions and write down your reason before each trade.</p>
+                        </article>
+                        <article class="workflow-card">
+                            <h3>Day 5-7</h3>
+                            <p>Review what worked, what felt rushed, and whether your position sizes stayed disciplined.</p>
+                        </article>
+                        <article class="workflow-card">
+                            <h3>Week 2 onward</h3>
+                            <p>Use the leaderboard for process comparison, not status. Improve repeatability before you increase size.</p>
+                        </article>
+                    </div>
+                </section>
+                <section class="content-band nested-band">
+                    <div class="section-heading">
+                        <h2>What Stockverse does not replace</h2>
+                    </div>
+                    <ul class="checklist warning-list">
+                        <li>Real emotional pressure that comes with real money.</li>
+                        <li>Taxes, slippage, spreads, and full execution mechanics.</li>
+                        <li>Deep company research, filings, macro analysis, and long-term judgment.</li>
+                        <li>The patience required to operate through multiple market cycles.</li>
+                    </ul>
+                </section>
+            </section>
+
+            <section class="guide-step content-band" data-step-title="Glossary">
+                <div class="section-heading">
+                    <h2>Glossary and final reminders</h2>
+                    <p>You do not need to memorize everything at once. These are the terms and ideas worth seeing enough times that they become natural.</p>
+                </div>
+                <div class="glossary-grid">
+                    <article class="glossary-card">
+                        <h3>Shares</h3>
+                        <p>The number of units you own in a stock.</p>
+                    </article>
+                    <article class="glossary-card">
+                        <h3>Average Cost</h3>
+                        <p>Your average purchase price per share across the position.</p>
+                    </article>
+                    <article class="glossary-card">
+                        <h3>Market Value</h3>
+                        <p>The value of your position at the latest price.</p>
+                    </article>
+                    <article class="glossary-card">
+                        <h3>Unrealized P/L</h3>
+                        <p>The gain or loss you would have if you exited right now.</p>
+                    </article>
+                    <article class="glossary-card">
+                        <h3>Market Cap</h3>
+                        <p>The company’s value in the market, roughly share price multiplied by shares outstanding.</p>
+                    </article>
+                    <article class="glossary-card">
+                        <h3>Catalyst</h3>
+                        <p>An event that can change investor expectations, such as earnings, guidance, or product news.</p>
+                    </article>
+                    <article class="glossary-card">
+                        <h3>Moat</h3>
+                        <p>The competitive edge that makes the company difficult to copy or displace.</p>
+                    </article>
+                    <article class="glossary-card">
+                        <h3>Diversification</h3>
+                        <p>Spreading exposure so no single idea or theme owns the whole account.</p>
+                    </article>
+                </div>
+                <section class="content-band footer-band nested-band">
+                    <div class="section-heading">
+                        <h2>Final reminders</h2>
+                        <p>Good investing is not about finding one perfect trade. It is about building a repeatable process that survives mistakes, uncertainty, and emotion.</p>
+                    </div>
+                    <div class="footer-actions">
+                        {% if username %}
+                        <a class="primary-btn" href="/home">Back to Trading Lab</a>
+                        {% else %}
+                        <a class="primary-btn" href="/">Create an Account</a>
+                        {% endif %}
+                    </div>
+                </section>
+                <section class="content-band nested-band">
+                    <div class="section-heading">
+                        <h2>Five habits worth keeping</h2>
+                    </div>
+                    <ul class="checklist">
+                        <li>Write down your reason before you buy.</li>
+                        <li>Keep your first size smaller than your confidence wants.</li>
+                        <li>Study businesses, not just symbols.</li>
+                        <li>Review your process after every exit.</li>
+                        <li>Use Stockverse to rehearse discipline until it becomes normal.</li>
+                    </ul>
+                </section>
+            </section>
+
+            <section class="guide-step content-band" data-step-title="Quiz">
+                <div class="section-heading">
+                    <h2>Guide quiz</h2>
+                    <p>Use this as a quick check. The goal is not perfection on the first try. The goal is to find which concepts still feel weak.</p>
+                </div>
+                <form id="guideQuiz" class="quiz-form">
+                    <section class="content-band nested-band">
+                        <div class="section-heading">
+                            <h2>Before you grade yourself</h2>
+                            <p>The score matters less than the gaps. If a question feels hard, it points directly to the chapter you should revisit.</p>
+                        </div>
+                        <div class="lesson-grid">
+                            <article class="lesson-card">
+                                <h3>Weak on market logic</h3>
+                                <p>Go back to Market Basics and Company Basics.</p>
+                            </article>
+                            <article class="lesson-card">
+                                <h3>Weak on risk</h3>
+                                <p>Review Risk, Portfolio, and Execution.</p>
+                            </article>
+                            <article class="lesson-card">
+                                <h3>Weak on application</h3>
+                                <p>Review Workflow and Using Stockverse, then practice on one symbol again.</p>
+                            </article>
+                        </div>
+                    </section>
+                    <fieldset class="quiz-card">
+                        <legend>1. Why do stock prices move?</legend>
+                        <label class="quiz-option"><input type="radio" name="q1" value="a"> Because investor expectations and supply-demand keep changing</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="b"> Because all popular stocks automatically rise</label>
+                        <label class="quiz-option"><input type="radio" name="q1" value="c"> Because the ticker symbol changes its letters</label>
+                    </fieldset>
+                    <fieldset class="quiz-card">
+                        <legend>2. What should come before a buy decision?</legend>
+                        <label class="quiz-option"><input type="radio" name="q2" value="a"> A clear thesis, an understanding of the business, and defined risk</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="b"> Only a fast price spike</label>
+                        <label class="quiz-option"><input type="radio" name="q2" value="c"> A leaderboard rank you want to copy</label>
+                    </fieldset>
+                    <fieldset class="quiz-card">
+                        <legend>3. Which metric tells you about top-line growth?</legend>
+                        <label class="quiz-option"><input type="radio" name="q3" value="a"> Revenue</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="b"> Ticker length</label>
+                        <label class="quiz-option"><input type="radio" name="q3" value="c"> Button color</label>
+                    </fieldset>
+                    <fieldset class="quiz-card">
+                        <legend>4. Why can a strong company still be a weak stock buy?</legend>
+                        <label class="quiz-option"><input type="radio" name="q4" value="a"> Because expectations and valuation may already be too high</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="b"> Because good companies never trade publicly</label>
+                        <label class="quiz-option"><input type="radio" name="q4" value="c"> Because stocks only reward weak businesses</label>
+                    </fieldset>
+                    <fieldset class="quiz-card">
+                        <legend>5. Why does smaller position sizing help beginners?</legend>
+                        <label class="quiz-option"><input type="radio" name="q5" value="a"> It guarantees profits</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="b"> It keeps one bad idea from controlling the whole account</label>
+                        <label class="quiz-option"><input type="radio" name="q5" value="c"> It removes all volatility from the market</label>
+                    </fieldset>
+                    <fieldset class="quiz-card">
+                        <legend>6. What is a healthy use of the leaderboard?</legend>
+                        <label class="quiz-option"><input type="radio" name="q6" value="a"> Use it to pressure yourself into bigger and bigger bets</label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="b"> Use it to compare discipline and consistency, not reckless risk-taking</label>
+                        <label class="quiz-option"><input type="radio" name="q6" value="c"> Assume the top user always has the best research</label>
+                    </fieldset>
+                    <fieldset class="quiz-card">
+                        <legend>7. What does Stockverse simplify compared with real markets?</legend>
+                        <label class="quiz-option"><input type="radio" name="q7" value="a"> It removes all need for any judgment</label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="b"> It simplifies execution so you can focus on learning process</label>
+                        <label class="quiz-option"><input type="radio" name="q7" value="c"> It guarantees that every trade idea is valid</label>
+                    </fieldset>
+                    <fieldset class="quiz-card">
+                        <legend>8. What should you review after a trade ends?</legend>
+                        <label class="quiz-option"><input type="radio" name="q8" value="a"> Whether the process was sound, not just whether it made money</label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="b"> Only whether the stock went up</label>
+                        <label class="quiz-option"><input type="radio" name="q8" value="c"> Nothing, because past trades never matter</label>
+                    </fieldset>
+                    <div class="quiz-actions">
+                        <button id="gradeQuiz" class="primary-btn" type="button">Grade Quiz</button>
+                        <p id="quizScore" class="quiz-score is-hidden"></p>
+                    </div>
+                </form>
+            </section>
+
+            <section class="content-band guide-controls-band">
+                <div class="guide-controls">
+                    <button id="guidePrev" class="ghost-btn" type="button">Previous</button>
+                    <button id="guideNext" class="primary-btn" type="button">Next</button>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+<script>
+    const guideSteps = Array.from(document.querySelectorAll('.guide-step'));
+    const stepPills = Array.from(document.querySelectorAll('.step-pill'));
+    const jumpButtons = Array.from(document.querySelectorAll('[data-jump-step]'));
+    const guidePrev = document.getElementById('guidePrev');
+    const guideNext = document.getElementById('guideNext');
+    const guideStepTitle = document.getElementById('guideStepTitle');
+    const guideStepCount = document.getElementById('guideStepCount');
+    const guideProgressFill = document.getElementById('guideProgressFill');
+    const gradeQuiz = document.getElementById('gradeQuiz');
+    const quizScore = document.getElementById('quizScore');
+    let currentGuideStep = 0;
+
+    function renderGuideStep(stepIndex) {
+        currentGuideStep = Math.max(0, Math.min(stepIndex, guideSteps.length - 1));
+        guideSteps.forEach((step, index) => {
+            step.classList.toggle('is-active', index === currentGuideStep);
+            step.classList.toggle('is-hidden', index !== currentGuideStep);
+        });
+
+        stepPills.forEach((pill, index) => {
+            pill.classList.toggle('is-active', index === currentGuideStep);
+        });
+
+        const activeStep = guideSteps[currentGuideStep];
+        const title = activeStep?.dataset.stepTitle || 'Guide';
+        guideStepTitle.textContent = title;
+        guideStepCount.textContent = `Step ${currentGuideStep + 1} of ${guideSteps.length}`;
+        if (guideProgressFill) {
+            const progress = guideSteps.length > 1 ? (currentGuideStep / (guideSteps.length - 1)) * 100 : 100;
+            guideProgressFill.style.height = `${progress}%`;
+        }
+
+        guidePrev.disabled = currentGuideStep === 0;
+        guideNext.disabled = currentGuideStep === guideSteps.length - 1;
+        guideNext.textContent = currentGuideStep === guideSteps.length - 1 ? 'Finished' : 'Next';
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    if (guidePrev) {
+        guidePrev.addEventListener('click', () => renderGuideStep(currentGuideStep - 1));
+    }
+
+    if (guideNext) {
+        guideNext.addEventListener('click', () => renderGuideStep(currentGuideStep + 1));
+    }
+
+    stepPills.forEach((pill, index) => {
+        pill.addEventListener('click', () => renderGuideStep(index));
+    });
+
+    jumpButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            const stepIndex = Number(button.dataset.jumpStep || 0);
+            renderGuideStep(stepIndex);
+        });
+    });
+
+    if (gradeQuiz) {
+        gradeQuiz.addEventListener('click', () => {
+            const answers = {
+                q1: 'a',
+                q2: 'a',
+                q3: 'a',
+                q4: 'a',
+                q5: 'b',
+                q6: 'b',
+                q7: 'b',
+                q8: 'a'
+            };
+            let score = 0;
+            const total = Object.keys(answers).length;
+            Object.entries(answers).forEach(([question, expected]) => {
+                const selected = document.querySelector(`input[name="${question}"]:checked`);
+                if (selected && selected.value === expected) {
+                    score += 1;
+                }
+            });
+
+            let message = 'review the guide again and tighten the weak spots.';
+            if (score === total) {
+                message = 'strong. you have the core framework.';
+            } else if (score >= total - 1) {
+                message = 'good. clean up the one or two weak areas.';
+            } else if (score >= total / 2) {
+                message = 'solid start. revisit the chapters you hesitated on.';
+            }
+
+            quizScore.textContent = `Score: ${score}/${total} - ${message}`;
+            quizScore.classList.remove('is-hidden');
+        });
+    }
+
+    renderGuideStep(0);
+</script>
+</body>
+</html>
