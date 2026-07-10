@@ -3,25 +3,23 @@
 }
 
 :root {
-    --bg-main: #060707;
-    --bg-surface: #0f1111;
-    --bg-panel: #151818;
-    --bg-panel-soft: #1a1f1d;
-    --border: #28312d;
-    --border-strong: #395248;
+    --bg-main: #000000;
+    --bg-surface: #000000;
+    --bg-panel: #000000;
+    --bg-panel-soft: #000000;
+    --border: #1f352d;
+    --border-strong: #2f5f4c;
     --text-main: #e4ebe7;
     --text-muted: #9fafaa;
-    --accent: #2fcf81;
-    --accent-strong: #229961;
-    --accent-text: #05140d;
+    --accent: #1dfd8b;
+    --accent-strong: #09c768;
+    --accent-text: #00160a;
 }
 
 body {
     margin: 0;
     font-family: "Segoe UI", Arial, sans-serif;
-    background:
-        radial-gradient(circle at top left, rgba(47, 207, 129, 0.08), transparent 28%),
-        linear-gradient(180deg, #060707 0%, #0a0d0b 100%);
+    background: #000000;
     color: var(--text-main);
 }
 
@@ -50,7 +48,7 @@ body {
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
-    background: rgba(6, 7, 7, 0.9);
+    background: #000000;
     backdrop-filter: blur(12px);
     z-index: 5;
 }
@@ -74,7 +72,7 @@ body {
     padding: 11px 16px;
     border-radius: 8px;
     font-weight: 600;
-    border: 1px solid #3de99a;
+    border: 1px solid #53ffac;
 }
 
 .hero {
@@ -129,7 +127,7 @@ body {
 #marketChart {
     width: 100%;
     margin-top: 12px;
-    background: #111514;
+    background: #000000;
     border: 1px solid var(--border);
     border-radius: 8px;
     display: block;
@@ -153,7 +151,7 @@ body {
 }
 
 .ticker-up {
-    color: #58df96 !important;
+    color: #42ff9e !important;
 }
 
 .ticker-down {
@@ -269,7 +267,7 @@ body {
 }
 
 .market-board-head {
-    background: #121715;
+    background: #000000;
     color: #9fafaa;
     font-size: 0.82rem;
     text-transform: uppercase;
@@ -283,8 +281,8 @@ body {
 }
 
 .market-row {
-    border-bottom: 1px solid rgba(40, 49, 45, 0.7);
-    background: rgba(21, 24, 24, 0.94);
+    border-bottom: 1px solid rgba(31, 53, 45, 0.9);
+    background: #000000;
 }
 
 .market-row:last-child {
@@ -298,7 +296,7 @@ body {
 
 .is-up span:nth-child(3),
 .is-up span:nth-child(4) {
-    color: #58df96;
+    color: #42ff9e;
 }
 
 .is-down span:nth-child(3),
@@ -319,7 +317,7 @@ body {
 .primary-btn {
     background: var(--accent);
     color: var(--accent-text);
-    border-color: #3de99a;
+    border-color: #53ffac;
 }
 
 .secondary-btn {
@@ -381,7 +379,7 @@ body {
     height: 42px;
     border: 1px solid var(--border-strong);
     border-radius: 8px;
-    background: #121715;
+    background: #000000;
     color: #e9f0ec;
     padding: 0 12px;
     font-size: 0.95rem;
@@ -389,7 +387,7 @@ body {
 }
 
 .auth-form input:focus {
-    border-color: #3de99a;
+    border-color: #53ffac;
 }
 
 .form-error {
@@ -409,7 +407,7 @@ body {
 }
 
 .inline-link {
-    color: #79e7b0;
+    color: #51ffab;
     text-decoration: none;
     font-weight: 600;
 }

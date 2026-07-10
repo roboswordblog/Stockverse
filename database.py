@@ -203,6 +203,48 @@ def get_user_holdings(username: str) -> list[dict]:
         ]
 
 
+def get_user_holding(username: str, symbol: str) -> dict | None:
+    create_user_database()
+    with _connect() as connection:
+        cursor = connection.cursor()
+        cursor.execute(
+            """
+            SELECT symbol, shares, average_price
+            FROM user_holdings
+            WHERE username = ? AND symbol = ?
+            """,
+            (username, symbol),
+        )
+        row = cursor.fetchone()
+        if not row:
+            return None
+        return {
+            "symbol": row[0],
+            "shares": int(row[1]),
+            "average_price": round(float(row[2]), 2),
+        }
+
+
+def list_users() -> list[dict]:
+    create_user_database()
+    with _connect() as connection:
+        cursor = connection.cursor()
+        cursor.execute(
+            """
+            SELECT username, money
+            FROM users
+            ORDER BY username COLLATE NOCASE ASC
+            """
+        )
+        return [
+            {
+                "username": row[0],
+                "money": round(float(row[1]), 2),
+            }
+            for row in cursor.fetchall()
+        ]
+
+
 def follow_stock(username: str, symbol: str) -> bool:
     create_user_database()
     with _connect() as connection:

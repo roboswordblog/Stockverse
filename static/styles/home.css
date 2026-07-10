@@ -3,17 +3,17 @@
 }
 
 :root {
-    --bg-main: #070909;
-    --bg-panel: #111515;
-    --bg-panel-soft: #171d1c;
-    --border: #27302d;
-    --border-strong: #385147;
+    --bg-main: #000000;
+    --bg-panel: #000000;
+    --bg-panel-soft: #000000;
+    --border: #1f352d;
+    --border-strong: #2f5f4c;
     --text-main: #edf2ef;
     --text-muted: #9caea7;
-    --accent: #31cf83;
-    --accent-dark: #07160e;
+    --accent: #1dfd8b;
+    --accent-dark: #00160a;
     --danger: #ff8282;
-    --success: #5fdea1;
+    --success: #42ff9e;
     --shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
 }
 
@@ -21,9 +21,7 @@ body {
     margin: 0;
     font-family: "Segoe UI", Arial, sans-serif;
     color: var(--text-main);
-    background:
-        radial-gradient(circle at top left, rgba(49, 207, 131, 0.08), transparent 24%),
-        linear-gradient(180deg, #050707 0%, #0a0d0c 100%);
+    background: #000000;
 }
 
 .home-shell,
@@ -37,7 +35,7 @@ body {
 .home-header,
 .stock-header,
 .panel {
-    background: rgba(17, 21, 21, 0.96);
+    background: #000000;
     border: 1px solid var(--border-strong);
     border-radius: 10px;
     box-shadow: var(--shadow);
@@ -104,7 +102,8 @@ h2 {
 }
 
 .search-panel,
-.holdings-panel {
+.holdings-panel,
+.leaderboard-panel {
     margin-top: 18px;
 }
 
@@ -134,7 +133,9 @@ h2 {
 }
 
 .holdings-head,
-.holding-row {
+.holding-row,
+.leaderboard-head,
+.leaderboard-row {
     display: grid;
     grid-template-columns: minmax(90px, 1fr) 0.7fr 0.9fr 0.9fr 0.8fr minmax(160px, 1.1fr);
     gap: 12px;
@@ -163,7 +164,8 @@ h2 {
 }
 
 .holdings-list,
-.search-results {
+.search-results,
+.leaderboard-list {
     display: grid;
     gap: 10px;
 }
@@ -182,6 +184,32 @@ h2 {
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 14px 16px;
+}
+
+.leaderboard-head {
+    padding: 0 0 12px;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    grid-template-columns: 72px minmax(120px, 1.2fr) 1fr 1fr 1.1fr 140px;
+}
+
+.leaderboard-row {
+    background: var(--bg-panel-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    grid-template-columns: 72px minmax(120px, 1.2fr) 1fr 1fr 1.1fr 140px;
+}
+
+.leaderboard-user {
+    font-weight: 700;
+}
+
+.leaderboard-row.is-current-user {
+    border-color: var(--accent);
+    box-shadow: inset 0 0 0 1px rgba(29, 253, 139, 0.2);
 }
 
 .followed-list {
@@ -211,7 +239,7 @@ h2 {
     height: 44px;
     border-radius: 10px;
     border: 1px solid var(--border-strong);
-    background: #0f1413;
+    background: #000000;
     color: var(--text-main);
     padding: 0 12px;
     font: inherit;
@@ -266,7 +294,7 @@ h2 {
 .primary-btn {
     background: var(--accent);
     color: var(--accent-dark);
-    border-color: #4bea9d;
+    border-color: #53ffac;
     font-weight: 700;
 }
 
@@ -322,6 +350,34 @@ h2 {
     flex-wrap: wrap;
 }
 
+.detail-chart-panel,
+.detail-position-panel {
+    margin-top: 18px;
+}
+
+.detail-chart-head {
+    margin-bottom: 12px;
+}
+
+.range-switch {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.history-range-btn.is-active {
+    border-color: #53ffac;
+    color: var(--accent);
+}
+
+#stockChart {
+    width: 100%;
+    display: block;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #000000;
+}
+
 .detail-stat-card {
     min-width: 150px;
     flex: 1;
@@ -358,7 +414,7 @@ h2 {
     height: 44px;
     border-radius: 10px;
     border: 1px solid var(--border-strong);
-    background: #0f1413;
+    background: #000000;
     color: var(--text-main);
     padding: 0 12px;
     font: inherit;
@@ -397,6 +453,10 @@ h2 {
     color: var(--danger);
 }
 
+.detail-flat {
+    color: var(--text-main);
+}
+
 .is-hidden {
     display: none !important;
 }
@@ -415,10 +475,22 @@ h2 {
         grid-template-columns: minmax(84px, 1fr) 1fr 1fr;
     }
 
+    .leaderboard-head,
+    .leaderboard-row {
+        grid-template-columns: 72px 1fr 1fr 1fr;
+    }
+
     .stock-table-head span:last-child,
     .stock-row button.follow-button,
     .holding-row .holding-action {
         grid-column: 1 / -1;
+    }
+
+    .leaderboard-head span:nth-child(5),
+    .leaderboard-head span:nth-child(6),
+    .leaderboard-row span:nth-child(5),
+    .leaderboard-row span:nth-child(6) {
+        grid-column: span 1;
     }
 }
 
@@ -443,7 +515,8 @@ h2 {
     }
 
     .holding-row,
-    .search-result-row {
+    .search-result-row,
+    .leaderboard-row {
         grid-template-columns: 1fr;
     }
 
@@ -453,6 +526,10 @@ h2 {
     }
 
     .holdings-head {
+        display: none;
+    }
+
+    .leaderboard-head {
         display: none;
     }
 }

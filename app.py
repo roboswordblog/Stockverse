@@ -6,15 +6,25 @@ from database import (
     create_user_database,
     follow_stock,
     get_followed_symbols,
+    get_user_holding,
     get_user_holdings,
     get_user_money,
+    list_users,
     login_user,
     sell_stock,
     signup_user,
     unfollow_stock,
     username_exists,
 )
-from dataCollection import get_stock_profile, get_stock_quote, get_top_100_stocks, search_stocks
+from dataCollection import (
+    get_market_last_refresh,
+    get_market_status,
+    get_stock_history,
+    get_stock_profile,
+    get_stock_quote,
+    get_top_100_stocks,
+    search_stocks,
+)
 
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "stockverse-dev-secret")
@@ -24,6 +34,84 @@ create_user_database()
 def _current_username() -> str | None:
     username = session.get("username")
     return username.strip() if isinstance(username, str) and username.strip() else None
+
+
+def _position_snapshot(holding: dict | None, stock_info: dict | None) -> dict:
+    shares = int((holding or {}).get("shares") or 0)
+    average_price = float((holding or {}).get("average_price") or 0)
+    current_price = float((stock_info or {}).get("price") or 0)
+    market_value = round(shares * current_price, 2)
+    cost_basis = round(shares * average_price, 2)
+    unrealized_change = round(market_value - cost_basis, 2)
+    unrealized_change_percent = round((unrealized_change / cost_basis) * 100, 2) if cost_basis else 0.0
+    return {
+        "shares": shares,
+        "average_price": round(average_price, 2),
+        "market_value": market_value,
+        "cost_basis": cost_basis,
+        "unrealized_change": unrealized_change,
+        "unrealized_change_percent": unrealized_change_percent,
+    }
+
+
+def _build_leaderboard(current_username: str | None, stock_map: dict[str, dict]) -> dict:
+    user_rows = list_users()
+    if not user_rows:
+        return {"leaders": [], "current_user": None}
+
+    portfolio_rows = []
+    for user in user_rows:
+        holdings = get_user_holdings(user["username"])
+        total_holdings_value = 0.0
+        open_positions = 0
+        for holding in holdings:
+            stock_info = stock_map.get(holding["symbol"]) or get_stock_quote(holding["symbol"]) or {}
+            total_holdings_value += holding["shares"] * float(stock_info.get("price") or 0)
+            open_positions += 1
+
+        cash = float(user["money"] or 0)
+        total_value = round(cash + total_holdings_value, 2)
+        total_return = round(total_value - 1000.0, 2)
+        return_percent = round((total_return / 1000.0) * 100, 2)
+        portfolio_rows.append(
+            {
+                "username": user["username"],
+                "cash": round(cash, 2),
+                "equity": round(total_holdings_value, 2),
+                "total_value": total_value,
+                "total_return": total_return,
+                "return_percent": return_percent,
+                "open_positions": open_positions,
+            }
+        )
+
+    portfolio_rows.sort(
+        key=lambda row: (row["total_value"], row["return_percent"], row["username"].lower()),
+        reverse=True,
+    )
+    for index, row in enumerate(portfolio_rows, start=1):
+        row["rank"] = index
+
+    current_user_row = next((row for row in portfolio_rows if row["username"] == current_username), None)
+    return {
+        "leaders": portfolio_rows[:8],
+        "current_user": current_user_row,
+    }
+
+
+def _static_version(path: str) -> int:
+    if not app.static_folder:
+        return 1
+    file_path = os.path.join(app.static_folder, path)
+    try:
+        return int(os.path.getmtime(file_path))
+    except OSError:
+        return 1
+
+
+@app.context_processor
+def inject_static_version():
+    return {"static_version": _static_version}
 
 @app.route('/')
 def index():
@@ -82,9 +170,10 @@ def home():
 @app.route('/getAllPrices')
 def getAllPrices():
     stocks = get_top_100_stocks()
+    market_status = get_market_status()
     if stocks is None:
-        return jsonify({'status': 'loading', 'stocks': []})
-    return jsonify({'status': 'ready', 'stocks': stocks})
+        return jsonify({'status': 'loading', 'stocks': [], 'updated_at': get_market_last_refresh(), 'market_status': market_status})
+    return jsonify({'status': 'ready', 'stocks': stocks, 'updated_at': get_market_last_refresh(), 'market_status': market_status})
 
 @app.route('/api/home/overview')
 def home_overview():
@@ -118,12 +207,15 @@ def home_overview():
             "ok": True,
             "username": username,
             "balance": get_user_money(username),
+            "updated_at": get_market_last_refresh(),
+            "market_status": get_market_status(),
             "top_stocks": [
                 {**stock, "followed": stock["symbol"] in followed_symbols}
                 for stock in top_ten
             ],
             "followed_stocks": followed,
             "holdings": holdings,
+            "leaderboard": _build_leaderboard(username, stock_map),
         }
     )
 
@@ -162,6 +254,7 @@ def getStockStats():
 
     profile = get_stock_profile(symbol) or {}
     followed = symbol in set(get_followed_symbols(username))
+    holding = get_user_holding(username, symbol)
     return jsonify(
         {
             "ok": True,
@@ -174,8 +267,25 @@ def getStockStats():
                 "followed": followed,
             },
             "balance": get_user_money(username),
+            "position": _position_snapshot(holding, quote),
+            "market_status": get_market_status(),
         }
     )
+
+
+@app.route('/api/stock-history')
+def stock_history():
+    username = _current_username()
+    if not username:
+        return jsonify({"ok": False, "error": "Not logged in."}), 401
+
+    symbol = (request.args.get("symbol") or "").strip().upper()
+    if not symbol:
+        return jsonify({"ok": False, "error": "Symbol is required."}), 400
+
+    range_key = (request.args.get("range") or "1M").strip().upper()
+    history = get_stock_history(symbol, range_key)
+    return jsonify({"ok": True, "history": history, "market_status": get_market_status()})
 
 @app.route('/api/buy', methods=['POST'])
 def buy():

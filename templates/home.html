@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stockverse Home</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/home.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/home.css', v=static_version('styles/home.css')) }}">
 </head>
 <body>
 <div id="home" class="home-shell">
@@ -15,9 +15,14 @@
             <p class="subtle">Welcome back, <span id="welcomeName">{{ username }}</span>.</p>
         </div>
         <div class="header-meta">
+            <button id="refreshOverview" class="ghost-btn" type="button">Refresh</button>
             <div class="balance-card">
                 <span>Balance</span>
                 <strong id="accountBalance">Loading...</strong>
+            </div>
+            <div class="balance-card">
+                <span>Market Update</span>
+                <strong id="marketUpdateStatus">Checking...</strong>
             </div>
         </div>
     </header>
@@ -53,6 +58,27 @@
             </div>
         </section>
     </main>
+
+    <section class="panel leaderboard-panel">
+        <div class="panel-head">
+            <div>
+                <h2>Leaderboard</h2>
+                <p>Top portfolios ranked by current account value.</p>
+            </div>
+        </div>
+        <div class="leaderboard-head">
+            <span>Rank</span>
+            <span>Trader</span>
+            <span>Cash</span>
+            <span>Total Value</span>
+            <span>Return</span>
+            <span>Open Positions</span>
+        </div>
+        <div id="leaderboardList" class="leaderboard-list">
+            <div class="panel-empty">Loading leaderboard...</div>
+        </div>
+        <p id="leaderboardFootnote" class="info-message is-hidden"></p>
+    </section>
 
     <section class="panel search-panel">
         <div class="panel-head">
@@ -135,6 +161,47 @@
                     <strong id="detailPreviousClose">-</strong>
                 </article>
             </div>
+            <section class="detail-chart-panel">
+                <div class="panel-head detail-chart-head">
+                    <div>
+                        <h2>Price Trend</h2>
+                        <p id="stockChartSubtle">Recent price action for this symbol.</p>
+                    </div>
+                    <div class="range-switch" id="historyRangeSwitch">
+                        <button class="ghost-btn history-range-btn is-active" type="button" data-range="1D">1D</button>
+                        <button class="ghost-btn history-range-btn" type="button" data-range="1W">1W</button>
+                        <button class="ghost-btn history-range-btn" type="button" data-range="1M">1M</button>
+                    </div>
+                </div>
+                <canvas id="stockChart" width="880" height="280" aria-label="Stock price chart"></canvas>
+                <p id="stockChartStatus" class="info-message">Loading chart...</p>
+            </section>
+            <section class="detail-position-panel">
+                <div class="panel-head">
+                    <div>
+                        <h2>Your Position</h2>
+                        <p>Current exposure and unrealized performance.</p>
+                    </div>
+                </div>
+                <div class="detail-stats-grid">
+                    <article class="detail-stat-card">
+                        <span>Shares Owned</span>
+                        <strong id="positionShares">0</strong>
+                    </article>
+                    <article class="detail-stat-card">
+                        <span>Avg Cost</span>
+                        <strong id="positionAveragePrice">$0.00</strong>
+                    </article>
+                    <article class="detail-stat-card">
+                        <span>Position Value</span>
+                        <strong id="positionMarketValue">$0.00</strong>
+                    </article>
+                    <article class="detail-stat-card">
+                        <span>Unrealized P/L</span>
+                        <strong id="positionUnrealized">$0.00</strong>
+                    </article>
+                </div>
+            </section>
         </section>
 
         <section class="panel buy-panel">
@@ -164,9 +231,13 @@
     const homeSection = document.getElementById('home');
     const stockSection = document.getElementById('stock');
     const accountBalance = document.getElementById('accountBalance');
+    const marketUpdateStatus = document.getElementById('marketUpdateStatus');
+    const refreshOverview = document.getElementById('refreshOverview');
     const topStocksList = document.getElementById('topStocksList');
     const followedStocksList = document.getElementById('followedStocksList');
     const holdingsList = document.getElementById('holdingsList');
+    const leaderboardList = document.getElementById('leaderboardList');
+    const leaderboardFootnote = document.getElementById('leaderboardFootnote');
     const backToHome = document.getElementById('backToHome');
     const detailFollowButton = document.getElementById('detailFollowButton');
     const buyForm = document.getElementById('buyForm');
@@ -177,10 +248,21 @@
     const sellMessage = document.getElementById('sellMessage');
     const stockSearchInput = document.getElementById('stockSearchInput');
     const searchResults = document.getElementById('searchResults');
+    const stockChart = document.getElementById('stockChart');
+    const stockChartStatus = document.getElementById('stockChartStatus');
+    const stockChartSubtle = document.getElementById('stockChartSubtle');
+    const historyRangeSwitch = document.getElementById('historyRangeSwitch');
+    const positionShares = document.getElementById('positionShares');
+    const positionAveragePrice = document.getElementById('positionAveragePrice');
+    const positionMarketValue = document.getElementById('positionMarketValue');
+    const positionUnrealized = document.getElementById('positionUnrealized');
 
-    let overviewState = { top_stocks: [], followed_stocks: [], holdings: [], balance: 0 };
+    let overviewState = { top_stocks: [], followed_stocks: [], holdings: [], balance: 0, leaderboard: { leaders: [], current_user: null } };
     let currentStock = null;
+    let currentHistory = [];
+    let currentHistoryRange = '1D';
     let overviewPoller = null;
+    let stockDetailPoller = null;
     let searchPoller = null;
 
     function formatMoney(value) {
@@ -196,7 +278,44 @@
         return `${prefix}${number.toFixed(2)}%`;
     }
 
+    function formatSignedMoney(value) {
+        const number = Number(value) || 0;
+        const prefix = number > 0 ? '+' : '';
+        return `${prefix}${formatMoney(number)}`;
+    }
+
+    function formatUpdatedLabel(unixSeconds) {
+        if (!unixSeconds) {
+            return 'Waiting for data';
+        }
+        const secondsAgo = Math.max(0, Math.floor(Date.now() / 1000) - Number(unixSeconds));
+        if (secondsAgo < 5) {
+            return 'Just now';
+        }
+        if (secondsAgo < 60) {
+            return `${secondsAgo}s ago`;
+        }
+        const minutes = Math.floor(secondsAgo / 60);
+        return `${minutes}m ago`;
+    }
+
+    function formatFeedStatus(marketStatus) {
+        const source = ((marketStatus || {}).source || 'cache').toLowerCase();
+        const error = ((marketStatus || {}).error || '').trim();
+        if (source === 'live') {
+            return 'Live';
+        }
+        if (error) {
+            return `Cache (${error})`;
+        }
+        return 'Cache';
+    }
+
     function showHome() {
+        if (stockDetailPoller) {
+            clearInterval(stockDetailPoller);
+            stockDetailPoller = null;
+        }
         stockSection.classList.add('is-hidden');
         homeSection.classList.remove('is-hidden');
     }
@@ -204,6 +323,15 @@
     function showStock() {
         homeSection.classList.add('is-hidden');
         stockSection.classList.remove('is-hidden');
+        if (stockDetailPoller) {
+            clearInterval(stockDetailPoller);
+        }
+        stockDetailPoller = setInterval(async () => {
+            if (currentStock?.symbol) {
+                await loadStockDetail(currentStock.symbol, { refreshHistory: false });
+                await loadStockHistory(currentStock.symbol, currentHistoryRange);
+            }
+        }, 30000);
     }
 
     function setInfoMessage(element, message, isError = false) {
@@ -212,9 +340,10 @@
         element.classList.toggle('is-error', isError);
     }
 
-    function renderTopStocks(stocks) {
+    function renderTopStocks(stocks, marketStatus = {}) {
         if (!stocks.length) {
-            topStocksList.innerHTML = '<div class="panel-empty">Loading top stocks...</div>';
+            const marketError = (marketStatus.error || '').trim();
+            topStocksList.innerHTML = `<div class="panel-empty">${marketError ? `Market data unavailable: ${marketError}.` : 'Loading top stocks...'}</div>`;
             return;
         }
 
@@ -235,9 +364,10 @@
         });
     }
 
-    function renderFollowedStocks(stocks) {
+    function renderFollowedStocks(stocks, marketStatus = {}) {
         if (!stocks.length) {
-            followedStocksList.innerHTML = '<div class="panel-empty">No followed stocks yet.</div>';
+            const marketError = (marketStatus.error || '').trim();
+            followedStocksList.innerHTML = `<div class="panel-empty">${marketError ? `Followed quotes unavailable: ${marketError}.` : 'No followed stocks yet.'}</div>`;
             return;
         }
 
@@ -281,6 +411,172 @@
             `;
             holdingsList.appendChild(item);
         });
+    }
+
+    function renderLeaderboard(leaderboard) {
+        const leaders = (leaderboard || {}).leaders || [];
+        if (!leaders.length) {
+            leaderboardList.innerHTML = '<div class="panel-empty">Leaderboard will appear once accounts have market value to rank.</div>';
+            leaderboardFootnote.classList.add('is-hidden');
+            return;
+        }
+
+        leaderboardList.innerHTML = '';
+        leaders.forEach((entry) => {
+            const row = document.createElement('div');
+            const returnClass = Number(entry.total_return) >= 0 ? 'is-up' : 'is-down';
+            const isCurrentUser = entry.username === overviewState.username;
+            row.className = `leaderboard-row ${returnClass}${isCurrentUser ? ' is-current-user' : ''}`;
+            row.innerHTML = `
+                <span>#${entry.rank}</span>
+                <span class="leaderboard-user">${entry.username}${isCurrentUser ? ' (You)' : ''}</span>
+                <span>${formatMoney(entry.cash)}</span>
+                <span>${formatMoney(entry.total_value)}</span>
+                <span>${formatSignedMoney(entry.total_return)} (${formatPercent(entry.return_percent)})</span>
+                <span>${entry.open_positions}</span>
+            `;
+            leaderboardList.appendChild(row);
+        });
+
+        const currentUser = (leaderboard || {}).current_user;
+        if (currentUser && currentUser.rank > leaders.length) {
+            leaderboardFootnote.textContent = `Your rank: #${currentUser.rank} at ${formatMoney(currentUser.total_value)}.`;
+            leaderboardFootnote.classList.remove('is-hidden');
+        } else {
+            leaderboardFootnote.classList.add('is-hidden');
+        }
+    }
+
+    function renderPosition(position) {
+        const shares = Number((position || {}).shares) || 0;
+        positionShares.textContent = String(shares);
+        positionAveragePrice.textContent = formatMoney((position || {}).average_price || 0);
+        positionMarketValue.textContent = formatMoney((position || {}).market_value || 0);
+        const unrealized = Number((position || {}).unrealized_change) || 0;
+        positionUnrealized.textContent = `${formatSignedMoney(unrealized)} / ${formatPercent((position || {}).unrealized_change_percent || 0)}`;
+        positionUnrealized.className = unrealized > 0 ? 'detail-up' : unrealized < 0 ? 'detail-down' : 'detail-flat';
+    }
+
+    function setActiveHistoryRange(rangeKey) {
+        currentHistoryRange = rangeKey;
+        document.querySelectorAll('.history-range-btn').forEach((button) => {
+            button.classList.toggle('is-active', button.dataset.range === rangeKey);
+        });
+    }
+
+    function drawStockChart(points, trendIsPositive = true) {
+        if (!stockChart) {
+            return;
+        }
+
+        const ctx = stockChart.getContext('2d');
+        if (!ctx) {
+            return;
+        }
+
+        const parentWidth = stockChart.parentElement ? stockChart.parentElement.clientWidth : stockChart.width;
+        const width = Math.max(320, Math.min(960, parentWidth - 8));
+        const height = 280;
+        stockChart.width = width;
+        stockChart.height = height;
+        ctx.clearRect(0, 0, width, height);
+
+        ctx.strokeStyle = 'rgba(47, 95, 76, 0.9)';
+        ctx.lineWidth = 1;
+        for (let i = 1; i <= 4; i += 1) {
+            const y = 24 + ((height - 48) / 4) * i;
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(width, y);
+            ctx.stroke();
+        }
+
+        if (!points.length) {
+            ctx.fillStyle = '#9caea7';
+            ctx.font = '15px Segoe UI';
+            ctx.textAlign = 'center';
+            ctx.fillText('Chart unavailable', width / 2, height / 2);
+            return;
+        }
+
+        const values = points.map((point) => Number(point.close) || 0).filter((value) => value > 0);
+        if (!values.length) {
+            return;
+        }
+
+        const minValue = Math.min(...values);
+        const maxValue = Math.max(...values);
+        const range = Math.max(maxValue - minValue, 1);
+        const horizontalStep = width / Math.max(points.length - 1, 1);
+        const lineColor = trendIsPositive ? '#1dfd8b' : '#ff8282';
+
+        ctx.beginPath();
+        points.forEach((point, index) => {
+            const value = Number(point.close) || minValue;
+            const normalized = (value - minValue) / range;
+            const x = horizontalStep * index;
+            const y = height - 24 - normalized * (height - 48);
+            if (index === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        });
+        ctx.strokeStyle = lineColor;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.lineTo(width, height);
+        ctx.lineTo(0, height);
+        ctx.closePath();
+        const gradient = ctx.createLinearGradient(0, 0, 0, height);
+        gradient.addColorStop(0, trendIsPositive ? 'rgba(29, 253, 139, 0.24)' : 'rgba(255, 130, 130, 0.20)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = gradient;
+        ctx.fill();
+    }
+
+    async function loadStockHistory(symbol, rangeKey = currentHistoryRange) {
+        if (!symbol) {
+            return;
+        }
+
+        setActiveHistoryRange(rangeKey);
+        stockChartStatus.textContent = 'Loading chart...';
+        stockChartStatus.classList.remove('is-error');
+        try {
+            const response = await fetch(`/api/stock-history?symbol=${encodeURIComponent(symbol)}&range=${encodeURIComponent(rangeKey)}`);
+            const data = await response.json();
+            if (!response.ok || !data.ok) {
+                stockChartStatus.textContent = data.error || 'Unable to load chart.';
+                stockChartStatus.classList.add('is-error');
+                currentHistory = [];
+                drawStockChart([]);
+                return;
+            }
+
+            const history = data.history || {};
+            currentHistory = Array.isArray(history.points) ? history.points : [];
+            const trendIsPositive = currentHistory.length >= 2
+                ? Number(currentHistory[currentHistory.length - 1].close) >= Number(currentHistory[0].close)
+                : Number(currentStock?.change) >= 0;
+            drawStockChart(currentHistory, trendIsPositive);
+            if ((history.source || '') === 'synthetic') {
+                stockChartStatus.textContent = 'Showing synthesized trend from the latest quote.';
+            } else if ((history.source || '') === 'snapshot') {
+                stockChartStatus.textContent = 'Showing price snapshot while full history is unavailable.';
+            } else if ((history.source || '') === 'unavailable') {
+                stockChartStatus.textContent = history.error || 'Chart unavailable.';
+            } else {
+                stockChartStatus.textContent = `${history.range || rangeKey} chart loaded.`;
+            }
+            stockChartStatus.classList.toggle('is-error', Boolean(history.error));
+        } catch (error) {
+            stockChartStatus.textContent = 'Unable to load chart.';
+            stockChartStatus.classList.add('is-error');
+            currentHistory = [];
+            drawStockChart([]);
+        }
     }
 
     function renderSearchResults(results) {
@@ -333,9 +629,13 @@
 
         overviewState = data;
         accountBalance.textContent = formatMoney(data.balance);
-        renderTopStocks(data.top_stocks || []);
-        renderFollowedStocks(data.followed_stocks || []);
+        if (marketUpdateStatus) {
+            marketUpdateStatus.textContent = `${formatUpdatedLabel(data.updated_at)} • ${formatFeedStatus(data.market_status)}`;
+        }
+        renderTopStocks(data.top_stocks || [], data.market_status || {});
+        renderFollowedStocks(data.followed_stocks || [], data.market_status || {});
         renderHoldings(data.holdings || []);
+        renderLeaderboard(data.leaderboard);
         bindStockLinks();
     }
 
@@ -358,7 +658,8 @@
         await loadOverview();
     }
 
-    async function loadStockDetail(symbol) {
+    async function loadStockDetail(symbol, options = {}) {
+        const { refreshHistory = true } = options;
         const response = await fetch(`/getStockStats?symbol=${encodeURIComponent(symbol)}`);
         const data = await response.json();
         if (!response.ok || !data.ok) {
@@ -370,16 +671,21 @@
         document.getElementById('stockMeta').textContent = `${data.stock.exchange} • ${data.stock.industry} • ${data.stock.country}`;
         document.getElementById('detailPrice').textContent = formatMoney(data.stock.price);
         document.getElementById('detailChange').textContent = `${data.stock.change >= 0 ? '+' : ''}${data.stock.change.toFixed(2)} / ${formatPercent(data.stock.percent_change)}`;
-        document.getElementById('detailChange').className = Number(data.stock.change) >= 0 ? 'detail-up' : 'detail-down';
+        document.getElementById('detailChange').className = Number(data.stock.change) > 0 ? 'detail-up' : Number(data.stock.change) < 0 ? 'detail-down' : 'detail-flat';
         document.getElementById('detailOpen').textContent = formatMoney(data.stock.open);
         document.getElementById('detailHigh').textContent = formatMoney(data.stock.high);
         document.getElementById('detailLow').textContent = formatMoney(data.stock.low);
         document.getElementById('detailPreviousClose').textContent = formatMoney(data.stock.previous_close);
         detailFollowButton.textContent = data.stock.followed ? 'Unfollow' : 'Follow';
         accountBalance.textContent = formatMoney(data.balance);
+        stockChartSubtle.textContent = `${formatUpdatedLabel((data.market_status || {}).last_refresh)} • ${formatFeedStatus(data.market_status)}`;
+        renderPosition(data.position);
         buyMessage.classList.add('is-hidden');
         sellMessage.classList.add('is-hidden');
         showStock();
+        if (refreshHistory) {
+            await loadStockHistory(symbol, currentHistoryRange);
+        }
     }
 
     async function sellHolding(symbol, shares) {
@@ -482,11 +788,30 @@
     });
 
     backToHome.addEventListener('click', showHome);
+    if (refreshOverview) {
+        refreshOverview.addEventListener('click', () => loadOverview());
+    }
+    if (historyRangeSwitch) {
+        historyRangeSwitch.addEventListener('click', (event) => {
+            const button = event.target.closest('.history-range-btn');
+            if (!button || !currentStock?.symbol) {
+                return;
+            }
+            loadStockHistory(currentStock.symbol, button.dataset.range || '1D');
+        });
+    }
     stockSearchInput.addEventListener('input', () => {
         if (searchPoller) {
             clearTimeout(searchPoller);
         }
         searchPoller = setTimeout(searchForStocks, 250);
+    });
+
+    window.addEventListener('resize', () => {
+        const trendIsPositive = currentHistory.length >= 2
+            ? Number(currentHistory[currentHistory.length - 1].close) >= Number(currentHistory[0].close)
+            : true;
+        drawStockChart(currentHistory, trendIsPositive);
     });
 
     function startOverviewPolling() {

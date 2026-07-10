@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stockverse</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/index.css', v=static_version('styles/index.css')) }}">
 </head>
 <body>
 <div id="index" class="view-section">
@@ -180,6 +180,7 @@
             <div class="market-actions">
                 <a class="ghost-btn section-link" href="#" data-section="index">Back Home</a>
                 <a class="ghost-btn section-link" href="#" data-section="signup">Sign Up</a>
+                <button id="refreshMarketBtn" class="ghost-btn" type="button">Refresh</button>
                 <a class="primary-btn section-link" href="#" data-section="login">Log In</a>
             </div>
         </div>
@@ -195,6 +196,14 @@
             <article class="summary-card">
                 <span class="summary-label">Mode</span>
                 <strong>Practice Trading</strong>
+            </article>
+            <article class="summary-card">
+                <span class="summary-label">Last Update</span>
+                <strong id="marketUpdatedAt">Checking...</strong>
+            </article>
+            <article class="summary-card">
+                <span class="summary-label">Feed</span>
+                <strong id="marketFeedStatus">Checking...</strong>
             </article>
         </div>
         <div class="market-board">
@@ -226,7 +235,10 @@
         });
 
         if (sectionId === 'market') {
-            loadMarketPrices();
+            startMarketPolling();
+            loadMarketPrices(true);
+        } else {
+            stopMarketPolling();
         }
     }
 
@@ -259,7 +271,7 @@
 
         ctx.clearRect(0, 0, width, height);
 
-        ctx.strokeStyle = 'rgba(151, 172, 161, 0.2)';
+        ctx.strokeStyle = 'rgba(101, 255, 179, 0.22)';
         ctx.lineWidth = 1;
         for (let i = 1; i <= 4; i += 1) {
             const y = (height / 5) * i;
@@ -270,7 +282,7 @@
         }
 
         if (!stocks.length) {
-            ctx.fillStyle = '#91aea1';
+            ctx.fillStyle = '#56ffb0';
             ctx.font = '16px Segoe UI';
             ctx.textAlign = 'center';
             ctx.fillText('Loading market pulse...', width / 2, height / 2);
@@ -297,7 +309,7 @@
             }
         });
 
-        ctx.strokeStyle = '#35d085';
+        ctx.strokeStyle = '#1dfd8b';
         ctx.lineWidth = 3;
         ctx.stroke();
 
@@ -306,8 +318,8 @@
         ctx.closePath();
 
         const gradient = ctx.createLinearGradient(0, 0, 0, height);
-        gradient.addColorStop(0, 'rgba(53, 208, 133, 0.20)');
-        gradient.addColorStop(1, 'rgba(53, 208, 133, 0)');
+        gradient.addColorStop(0, 'rgba(29, 253, 139, 0.26)');
+        gradient.addColorStop(1, 'rgba(29, 253, 139, 0)');
         ctx.fillStyle = gradient;
         ctx.fill();
     }
@@ -354,9 +366,15 @@
     const loginSubmitError = document.getElementById('loginSubmitError');
     const marketList = document.getElementById('marketList');
     const marketCount = document.getElementById('marketCount');
+    const marketUpdatedAt = document.getElementById('marketUpdatedAt');
+    const marketFeedStatus = document.getElementById('marketFeedStatus');
+    const refreshMarketBtn = document.getElementById('refreshMarketBtn');
     let usernamePoller = null;
+    let marketPoller = null;
     let marketLoaded = false;
     let latestStocks = [];
+    let latestUpdatedAt = 0;
+    let latestFeedStatus = { source: 'cache', error: '' };
 
     function setMessage(element, message) {
         if (!element) {
@@ -448,11 +466,50 @@
         });
     }
 
+    function formatUpdatedLabel(unixSeconds) {
+        if (!unixSeconds) {
+            return 'Waiting for data';
+        }
+        const secondsAgo = Math.max(0, Math.floor(Date.now() / 1000) - Number(unixSeconds));
+        if (secondsAgo < 5) {
+            return 'Just now';
+        }
+        if (secondsAgo < 60) {
+            return `${secondsAgo}s ago`;
+        }
+        const minutes = Math.floor(secondsAgo / 60);
+        return `${minutes}m ago`;
+    }
+
+    function renderUpdatedTime() {
+        if (!marketUpdatedAt) {
+            return;
+        }
+        marketUpdatedAt.textContent = formatUpdatedLabel(latestUpdatedAt);
+    }
+
+    function renderFeedStatus() {
+        if (!marketFeedStatus) {
+            return;
+        }
+        const source = (latestFeedStatus.source || 'cache').toLowerCase();
+        if (source === 'live') {
+            marketFeedStatus.textContent = 'Live';
+            return;
+        }
+        marketFeedStatus.textContent = latestFeedStatus.error
+            ? `Cache (${latestFeedStatus.error})`
+            : 'Cache';
+    }
+
     async function loadMarketPrices(forceReload = false) {
         if (!marketList) {
             return;
         }
-        if (marketLoaded && !forceReload) {
+        if (marketLoaded && !forceReload && latestStocks.length) {
+            renderMarketPrices(latestStocks);
+            renderPulse(latestStocks);
+            renderUpdatedTime();
             return;
         }
 
@@ -463,16 +520,54 @@
             const data = await response.json();
             const stocks = data.status === 'ready' && Array.isArray(data.stocks) ? data.stocks : [];
             latestStocks = stocks;
+            latestUpdatedAt = Number(data.updated_at) || 0;
+            latestFeedStatus = data.market_status || { source: 'cache', error: '' };
             renderPulse(stocks);
             renderMarketPrices(stocks);
+            renderUpdatedTime();
+            renderFeedStatus();
             marketLoaded = stocks.length > 0;
         } catch (error) {
-            latestStocks = [];
-            renderPulse([]);
-            marketList.innerHTML = '<div class="market-empty">Unable to load market data.</div>';
-            marketCount.textContent = 'Loading';
-            marketLoaded = false;
+            if (latestStocks.length) {
+                renderMarketPrices(latestStocks);
+                renderPulse(latestStocks);
+                renderUpdatedTime();
+                renderFeedStatus();
+            } else {
+                latestStocks = [];
+                renderPulse([]);
+                marketList.innerHTML = '<div class="market-empty">Unable to load market data.</div>';
+                marketCount.textContent = 'Loading';
+                if (marketFeedStatus) {
+                    marketFeedStatus.textContent = 'Offline';
+                }
+                marketLoaded = false;
+            }
         }
+    }
+
+    function startMarketPolling() {
+        if (marketPoller) {
+            clearInterval(marketPoller);
+        }
+        marketPoller = setInterval(() => {
+            if (!document.getElementById('market')?.classList.contains('is-hidden')) {
+                loadMarketPrices(true);
+            } else {
+                renderUpdatedTime();
+            }
+        }, 15000);
+    }
+
+    function stopMarketPolling() {
+        if (marketPoller) {
+            clearInterval(marketPoller);
+            marketPoller = null;
+        }
+    }
+
+    if (refreshMarketBtn) {
+        refreshMarketBtn.addEventListener('click', () => loadMarketPrices(true));
     }
 
     if (signupForm) {
@@ -564,7 +659,8 @@
         });
     }
 
-    loadMarketPrices();
+    startMarketPolling();
+    loadMarketPrices(true);
 </script>
 </body>
 </html>
