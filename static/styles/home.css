@@ -75,6 +75,29 @@ h2 {
     flex-wrap: wrap;
 }
 
+.header-stock-search {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: min(360px, 100%);
+}
+
+.header-stock-search input {
+    width: 220px;
+    height: 42px;
+    border-radius: 10px;
+    border: 1px solid var(--border-strong);
+    background: #000000;
+    color: var(--text-main);
+    padding: 0 12px;
+    font: inherit;
+}
+
+.header-stock-search .primary-btn {
+    min-height: 42px;
+    padding: 10px 12px;
+}
+
 .stock-header-actions {
     gap: 10px;
     flex-wrap: wrap;
@@ -549,5 +572,14 @@ h2 {
 
     .leaderboard-head {
         display: none;
+    }
+
+    .header-stock-search {
+        width: 100%;
+    }
+
+    .header-stock-search input {
+        flex: 1;
+        width: auto;
     }
 }

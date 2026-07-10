@@ -15,6 +15,10 @@
             <p class="subtle">Welcome back, <span id="welcomeName">{{ username }}</span>.</p>
         </div>
         <div class="header-meta">
+            <div class="header-stock-search">
+                <input id="topStockSearchInput" type="text" placeholder="Search stocks">
+                <button id="topStockSearchGo" class="primary-btn" type="button">Search</button>
+            </div>
             <a class="ghost-btn" href="/guide">Guide</a>
             <button id="refreshOverview" class="ghost-btn" type="button">Refresh</button>
             <div class="balance-card">
@@ -105,7 +109,7 @@
         <p id="leaderboardFootnote" class="info-message is-hidden"></p>
     </section>
 
-    <section class="panel search-panel">
+    <section id="searchPanel" class="panel search-panel">
         <div class="panel-head">
             <div>
                 <h2>Search Stocks</h2>
@@ -272,8 +276,11 @@
     const sellForm = document.getElementById('sellForm');
     const sellShares = document.getElementById('sellShares');
     const sellMessage = document.getElementById('sellMessage');
+    const topStockSearchInput = document.getElementById('topStockSearchInput');
+    const topStockSearchGo = document.getElementById('topStockSearchGo');
     const stockSearchInput = document.getElementById('stockSearchInput');
     const searchResults = document.getElementById('searchResults');
+    const searchPanel = document.getElementById('searchPanel');
     const stockChart = document.getElementById('stockChart');
     const stockChartStatus = document.getElementById('stockChartStatus');
     const stockChartSubtle = document.getElementById('stockChartSubtle');
@@ -748,6 +755,31 @@
         bindStockLinks();
     }
 
+    function queueSearch() {
+        if (searchPoller) {
+            clearTimeout(searchPoller);
+        }
+        searchPoller = setTimeout(searchForStocks, 250);
+    }
+
+    function syncSearchInputs(source = 'main') {
+        const value = source === 'top'
+            ? (topStockSearchInput ? topStockSearchInput.value : '')
+            : stockSearchInput.value;
+        const normalized = value || '';
+        stockSearchInput.value = normalized;
+        if (topStockSearchInput && source !== 'top') {
+            topStockSearchInput.value = normalized;
+        }
+    }
+
+    function focusSearchPanel() {
+        if (!searchPanel) {
+            return;
+        }
+        searchPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
     detailFollowButton.addEventListener('click', async () => {
         if (!currentStock) {
             return;
@@ -827,11 +859,31 @@
         });
     }
     stockSearchInput.addEventListener('input', () => {
-        if (searchPoller) {
-            clearTimeout(searchPoller);
-        }
-        searchPoller = setTimeout(searchForStocks, 250);
+        syncSearchInputs('main');
+        queueSearch();
     });
+    if (topStockSearchInput) {
+        topStockSearchInput.addEventListener('input', () => {
+            syncSearchInputs('top');
+            queueSearch();
+        });
+        topStockSearchInput.addEventListener('keydown', (event) => {
+            if (event.key !== 'Enter') {
+                return;
+            }
+            event.preventDefault();
+            syncSearchInputs('top');
+            searchForStocks();
+            focusSearchPanel();
+        });
+    }
+    if (topStockSearchGo) {
+        topStockSearchGo.addEventListener('click', () => {
+            syncSearchInputs('top');
+            searchForStocks();
+            focusSearchPanel();
+        });
+    }
 
     window.addEventListener('resize', () => {
         const trendIsPositive = currentHistory.length >= 2
