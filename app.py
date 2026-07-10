@@ -118,6 +118,11 @@ def inject_static_version():
 def index():
     return render_template('index.html')
 
+
+@app.route('/guide')
+def guide():
+    return render_template('guide.html', username=_current_username())
+
 @app.route('/usernameThere')
 def username_there():
     username = (request.args.get('username') or '').strip()

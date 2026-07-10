@@ -13,7 +13,10 @@
             <h1>Stockverse</h1>
             <p>Practice investing with live market data and zero risk.</p>
         </div>
-        <a class="header-cta section-link" href="#" data-section="market">See Market</a>
+        <div class="site-header-actions">
+            <a class="ghost-btn" href="/guide">Beginner Guide</a>
+            <a class="header-cta section-link" href="#" data-section="market">See Market</a>
+        </div>
     </header>
 
     <main>
@@ -24,6 +27,7 @@
                 Test strategies, watch positions update live, and learn how market behavior impacts your returns.
             </p>
             <div class="hero-actions">
+                <a class="ghost-btn" href="/guide">Read the Guide</a>
                 <a class="primary-btn section-link" href="#" data-section="market">See Market</a>
                 <a class="secondary-btn section-link" href="#" data-section="signup">Sign Up</a>
                 <a class="secondary-btn section-link" href="#" data-section="login">Log In</a>
@@ -179,6 +183,7 @@
             </div>
             <div class="market-actions">
                 <a class="ghost-btn section-link" href="#" data-section="index">Back Home</a>
+                <a class="ghost-btn" href="/guide">Guide</a>
                 <a class="ghost-btn section-link" href="#" data-section="signup">Sign Up</a>
                 <button id="refreshMarketBtn" class="ghost-btn" type="button">Refresh</button>
                 <a class="primary-btn section-link" href="#" data-section="login">Log In</a>
@@ -271,7 +276,7 @@
 
         ctx.clearRect(0, 0, width, height);
 
-        ctx.strokeStyle = 'rgba(101, 255, 179, 0.22)';
+        ctx.strokeStyle = 'rgba(74, 158, 108, 0.24)';
         ctx.lineWidth = 1;
         for (let i = 1; i <= 4; i += 1) {
             const y = (height / 5) * i;
@@ -282,7 +287,7 @@
         }
 
         if (!stocks.length) {
-            ctx.fillStyle = '#56ffb0';
+            ctx.fillStyle = '#79b792';
             ctx.font = '16px Segoe UI';
             ctx.textAlign = 'center';
             ctx.fillText('Loading market pulse...', width / 2, height / 2);
@@ -309,7 +314,7 @@
             }
         });
 
-        ctx.strokeStyle = '#1dfd8b';
+        ctx.strokeStyle = '#4a9e6c';
         ctx.lineWidth = 3;
         ctx.stroke();
 
@@ -318,8 +323,8 @@
         ctx.closePath();
 
         const gradient = ctx.createLinearGradient(0, 0, 0, height);
-        gradient.addColorStop(0, 'rgba(29, 253, 139, 0.26)');
-        gradient.addColorStop(1, 'rgba(29, 253, 139, 0)');
+        gradient.addColorStop(0, 'rgba(74, 158, 108, 0.22)');
+        gradient.addColorStop(1, 'rgba(74, 158, 108, 0)');
         ctx.fillStyle = gradient;
         ctx.fill();
     }

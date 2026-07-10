@@ -15,6 +15,7 @@
             <p class="subtle">Welcome back, <span id="welcomeName">{{ username }}</span>.</p>
         </div>
         <div class="header-meta">
+            <a class="ghost-btn" href="/guide">Guide</a>
             <button id="refreshOverview" class="ghost-btn" type="button">Refresh</button>
             <div class="balance-card">
                 <span>Balance</span>
@@ -127,6 +128,7 @@
             </div>
         </div>
         <div class="stock-header-actions">
+            <a class="ghost-btn" href="/guide">Guide</a>
             <button id="detailFollowButton" class="ghost-btn" type="button">Follow</button>
         </div>
     </header>
@@ -508,7 +510,7 @@
         const maxValue = Math.max(...values);
         const range = Math.max(maxValue - minValue, 1);
         const horizontalStep = width / Math.max(points.length - 1, 1);
-        const lineColor = trendIsPositive ? '#1dfd8b' : '#ff8282';
+        const lineColor = trendIsPositive ? '#4a9e6c' : '#d18282';
 
         ctx.beginPath();
         points.forEach((point, index) => {
@@ -530,7 +532,7 @@
         ctx.lineTo(0, height);
         ctx.closePath();
         const gradient = ctx.createLinearGradient(0, 0, 0, height);
-        gradient.addColorStop(0, trendIsPositive ? 'rgba(29, 253, 139, 0.24)' : 'rgba(255, 130, 130, 0.20)');
+        gradient.addColorStop(0, trendIsPositive ? 'rgba(74, 158, 108, 0.22)' : 'rgba(209, 130, 130, 0.18)');
         gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
         ctx.fillStyle = gradient;
         ctx.fill();
