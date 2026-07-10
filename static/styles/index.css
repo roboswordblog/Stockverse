@@ -11,8 +11,8 @@
     --border-strong: #365645;
     --text-main: #e4ebe7;
     --text-muted: #9fafaa;
-    --accent: #4a9e6c;
-    --accent-strong: #3b8257;
+    --accent: #2ef26f;
+    --accent-strong: #1ecb59;
     --accent-text: #041008;
 }
 
@@ -72,14 +72,26 @@ body {
     flex-wrap: wrap;
 }
 
+.header-cta,
+.ghost-btn,
+.primary-btn,
+.secondary-btn,
+.inline-link {
+    line-height: 1;
+}
+
 .header-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     text-decoration: none;
     background: var(--accent);
     color: var(--accent-text);
+    min-height: 42px;
     padding: 11px 16px;
     border-radius: 8px;
     font-weight: 600;
-    border: 1px solid #6ca683;
+    border: 1px solid #67ff9a;
 }
 
 .hero {
@@ -106,6 +118,7 @@ body {
 .hero-actions {
     margin-top: 22px;
     display: flex;
+    align-items: center;
     flex-wrap: wrap;
     gap: 12px;
 }
@@ -158,7 +171,7 @@ body {
 }
 
 .ticker-up {
-    color: #79b792 !important;
+    color: #76ff9c !important;
 }
 
 .ticker-down {
@@ -173,9 +186,12 @@ body {
 
 .primary-btn,
 .secondary-btn {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 8px;
     font-weight: 600;
+    min-height: 42px;
     padding: 11px 15px;
     cursor: pointer;
     border: 1px solid transparent;
@@ -183,7 +199,10 @@ body {
 }
 
 .ghost-btn {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
     padding: 9px 12px;
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -227,6 +246,7 @@ body {
 
 .market-actions {
     display: flex;
+    align-items: center;
     gap: 10px;
     flex-wrap: wrap;
 }
@@ -303,7 +323,7 @@ body {
 
 .is-up span:nth-child(3),
 .is-up span:nth-child(4) {
-    color: #79b792;
+    color: #76ff9c;
 }
 
 .is-down span:nth-child(3),
@@ -324,7 +344,7 @@ body {
 .primary-btn {
     background: var(--accent);
     color: var(--accent-text);
-    border-color: #6ca683;
+    border-color: #67ff9a;
 }
 
 .secondary-btn {
@@ -354,6 +374,7 @@ body {
 
 .auth-topbar {
     display: flex;
+    align-items: center;
     gap: 10px;
     flex-wrap: wrap;
     margin-bottom: 16px;
@@ -394,7 +415,7 @@ body {
 }
 
 .auth-form input:focus {
-    border-color: #6ca683;
+    border-color: #67ff9a;
 }
 
 .form-error {
@@ -414,7 +435,7 @@ body {
 }
 
 .inline-link {
-    color: #79b792;
+    color: #76ff9c;
     text-decoration: none;
     font-weight: 600;
 }
@@ -433,6 +454,7 @@ body {
 .auth-actions {
     margin-top: 20px;
     display: flex;
+    align-items: center;
     flex-wrap: wrap;
     gap: 12px;
 }

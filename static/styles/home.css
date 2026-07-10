@@ -10,10 +10,10 @@
     --border-strong: #365645;
     --text-main: #edf2ef;
     --text-muted: #9caea7;
-    --accent: #4a9e6c;
+    --accent: #2ef26f;
     --accent-dark: #041008;
     --danger: #d18282;
-    --success: #79b792;
+    --success: #76ff9c;
     --shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
 }
 
@@ -75,6 +75,11 @@ h2 {
     flex-wrap: wrap;
 }
 
+.stock-header-actions {
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
 .balance-card {
     min-width: 160px;
     background: var(--bg-panel-soft);
@@ -103,7 +108,8 @@ h2 {
 
 .search-panel,
 .holdings-panel,
-.leaderboard-panel {
+.leaderboard-panel,
+.learning-panel {
     margin-top: 18px;
 }
 
@@ -122,6 +128,12 @@ h2 {
 .panel-head p {
     margin: 6px 0 0;
     color: var(--text-muted);
+}
+
+.learning-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
 }
 
 .stock-table,
@@ -209,7 +221,7 @@ h2 {
 
 .leaderboard-row.is-current-user {
     border-color: var(--accent);
-    box-shadow: inset 0 0 0 1px rgba(74, 158, 108, 0.2);
+    box-shadow: inset 0 0 0 1px rgba(46, 242, 111, 0.2);
 }
 
 .followed-list {
@@ -279,11 +291,17 @@ h2 {
 
 .ghost-btn,
 .primary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 10px;
+    min-height: 42px;
     padding: 10px 14px;
     border: 1px solid var(--border);
     font: inherit;
+    line-height: 1;
     cursor: pointer;
+    text-decoration: none;
 }
 
 .ghost-btn {
@@ -294,7 +312,7 @@ h2 {
 .primary-btn {
     background: var(--accent);
     color: var(--accent-dark);
-    border-color: #6ca683;
+    border-color: #67ff9a;
     font-weight: 700;
 }
 
@@ -366,7 +384,7 @@ h2 {
 }
 
 .history-range-btn.is-active {
-    border-color: #6ca683;
+    border-color: #67ff9a;
     color: var(--accent);
 }
 

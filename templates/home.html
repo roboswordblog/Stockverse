@@ -60,6 +60,30 @@
         </section>
     </main>
 
+    <section class="panel learning-panel">
+        <div class="panel-head">
+            <div>
+                <h2>Learning Hub</h2>
+                <p>Use the guide before you take bigger practice positions or try a new stock.</p>
+            </div>
+            <a class="primary-btn" href="/guide">Open Guide</a>
+        </div>
+        <div class="learning-grid">
+            <article class="detail-stat-card">
+                <span>Best For</span>
+                <strong>First trades</strong>
+            </article>
+            <article class="detail-stat-card">
+                <span>Covers</span>
+                <strong>Quotes, sizing, risk</strong>
+            </article>
+            <article class="detail-stat-card">
+                <span>Format</span>
+                <strong>Step walkthrough + quiz</strong>
+            </article>
+        </div>
+    </section>
+
     <section class="panel leaderboard-panel">
         <div class="panel-head">
             <div>
@@ -510,7 +534,7 @@
         const maxValue = Math.max(...values);
         const range = Math.max(maxValue - minValue, 1);
         const horizontalStep = width / Math.max(points.length - 1, 1);
-        const lineColor = trendIsPositive ? '#4a9e6c' : '#d18282';
+        const lineColor = trendIsPositive ? '#2ef26f' : '#d18282';
 
         ctx.beginPath();
         points.forEach((point, index) => {
@@ -532,7 +556,7 @@
         ctx.lineTo(0, height);
         ctx.closePath();
         const gradient = ctx.createLinearGradient(0, 0, 0, height);
-        gradient.addColorStop(0, trendIsPositive ? 'rgba(74, 158, 108, 0.22)' : 'rgba(209, 130, 130, 0.18)');
+        gradient.addColorStop(0, trendIsPositive ? 'rgba(46, 242, 111, 0.22)' : 'rgba(209, 130, 130, 0.18)');
         gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
         ctx.fillStyle = gradient;
         ctx.fill();

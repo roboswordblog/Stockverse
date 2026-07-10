@@ -147,8 +147,8 @@ def signup():
     if not created:
         return jsonify({'ok': False, 'error': 'Unable to create account.'}), 500
 
-    session["username"] = username
-    return jsonify({'ok': True})
+    session.pop("username", None)
+    return jsonify({'ok': True, 'username': username})
 
 
 @app.route('/login', methods=['POST'])

@@ -179,7 +179,7 @@
         <div class="market-toolbar">
             <div>
                 <h2>Market Board</h2>
-                <p>Track leading names, scan momentum, and move into your simulator with current pricing.</p>
+                <p>Track leading names, scan momentum, and move into your trading lab with current pricing.</p>
             </div>
             <div class="market-actions">
                 <a class="ghost-btn section-link" href="#" data-section="index">Back Home</a>
@@ -276,7 +276,7 @@
 
         ctx.clearRect(0, 0, width, height);
 
-        ctx.strokeStyle = 'rgba(74, 158, 108, 0.24)';
+        ctx.strokeStyle = 'rgba(46, 242, 111, 0.24)';
         ctx.lineWidth = 1;
         for (let i = 1; i <= 4; i += 1) {
             const y = (height / 5) * i;
@@ -287,7 +287,7 @@
         }
 
         if (!stocks.length) {
-            ctx.fillStyle = '#79b792';
+            ctx.fillStyle = '#76ff9c';
             ctx.font = '16px Segoe UI';
             ctx.textAlign = 'center';
             ctx.fillText('Loading market pulse...', width / 2, height / 2);
@@ -314,7 +314,7 @@
             }
         });
 
-        ctx.strokeStyle = '#4a9e6c';
+        ctx.strokeStyle = '#2ef26f';
         ctx.lineWidth = 3;
         ctx.stroke();
 
@@ -323,8 +323,8 @@
         ctx.closePath();
 
         const gradient = ctx.createLinearGradient(0, 0, 0, height);
-        gradient.addColorStop(0, 'rgba(74, 158, 108, 0.22)');
-        gradient.addColorStop(1, 'rgba(74, 158, 108, 0)');
+        gradient.addColorStop(0, 'rgba(46, 242, 111, 0.22)');
+        gradient.addColorStop(1, 'rgba(46, 242, 111, 0)');
         ctx.fillStyle = gradient;
         ctx.fill();
     }
@@ -611,7 +611,15 @@
                     setMessage(signupSubmitError, data.error || 'Could not create account.');
                     return;
                 }
-                window.location.href = '/home';
+                if (loginUsername) {
+                    loginUsername.value = data.username || username;
+                }
+                if (loginPassword) {
+                    loginPassword.value = '';
+                }
+                setMessage(signupSubmitError, '');
+                setMessage(loginSubmitError, 'Account created. Log in to continue.');
+                showSection('login');
             } catch (error) {
                 setMessage(signupSubmitError, 'Network error while creating account.');
             } finally {
