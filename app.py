@@ -31,6 +31,7 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY", "stockverse-dev-secret")
 create_user_database()
 
 
+
 def _current_username() -> str | None:
     username = session.get("username")
     return username.strip() if isinstance(username, str) and username.strip() else None
