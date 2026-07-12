@@ -1,8 +1,9 @@
+import os
 import sqlite3
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
-DATA_DIR = BASE_DIR / "data"
+DATA_DIR = Path(os.getenv("STOCKVERSE_DATA_DIR", str(BASE_DIR / "data"))).expanduser()
 DB_PATH = DATA_DIR / "stockverse.db"
 
 

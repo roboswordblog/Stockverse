@@ -12,8 +12,9 @@ import certifi
 
 FINNHUB_BASE_URL = "https://finnhub.io/api/v1"
 BASE_DIR = Path(__file__).resolve().parent
+DATA_DIR = Path(os.getenv("STOCKVERSE_DATA_DIR", str(BASE_DIR / "data"))).expanduser()
 ENV_FILES = [BASE_DIR / "api.env", BASE_DIR / ".env"]
-CACHE_FILE = BASE_DIR / "data" / "market_cache.json"
+CACHE_FILE = DATA_DIR / "market_cache.json"
 QUOTE_REFRESH_SECONDS = 15
 PRIORITY_SYMBOL_COUNT = 5
 ROTATION_BATCH_SIZE = 5
@@ -52,10 +53,10 @@ def _read_env_file_value(key: str) -> str:
 
 
 def _get_api_key() -> str:
-    file_key = _read_env_file_value("FINNHUB_API_KEY")
-    if file_key:
-        return file_key
-    return os.getenv("FINNHUB_API_KEY", "").strip()
+    env_key = os.getenv("FINNHUB_API_KEY", "").strip()
+    if env_key:
+        return env_key
+    return _read_env_file_value("FINNHUB_API_KEY")
 
 
 def _read_cache() -> dict[str, dict]:
