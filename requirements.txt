@@ -1,3 +1,4 @@
 Flask
 certifi
 gunicorn
+psycopg[binary]

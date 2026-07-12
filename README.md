@@ -9,12 +9,13 @@ Required settings:
 
 - Build command: `pip install -r requirements.txt`
 - Start command: `gunicorn app:app`
+- Environment variable: `DATABASE_URL` (your Neon connection string)
 - Environment variable: `FINNHUB_API_KEY`
 - Environment variable: `FLASK_SECRET_KEY` (the Blueprint can generate this)
-- Environment variable: `STOCKVERSE_DATA_DIR=/var/data/stockverse`
+- Environment variable: `STOCKVERSE_DATA_DIR=/tmp/stockverse`
 
 Important:
 
-- The app uses SQLite and a market cache file on disk.
-- On Render, those files should live on a persistent disk or they will reset on redeploy/restart.
-- The included Blueprint mounts a disk at `/var/data` and points the app at `/var/data/stockverse`.
+- The app now uses Neon Postgres when `DATABASE_URL` is set.
+- SQLite remains available as a local fallback when `DATABASE_URL` is not set.
+- `STOCKVERSE_DATA_DIR` is only for the market cache file and local SQLite fallback data.

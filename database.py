@@ -2,136 +2,167 @@ import os
 import sqlite3
 from pathlib import Path
 
+try:
+    import psycopg
+except ImportError:  # pragma: no cover - optional for local sqlite fallback
+    psycopg = None
+
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = Path(os.getenv("STOCKVERSE_DATA_DIR", str(BASE_DIR / "data"))).expanduser()
 DB_PATH = DATA_DIR / "stockverse.db"
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+USE_POSTGRES = bool(DATABASE_URL)
 
 
-def _connect() -> sqlite3.Connection:
+def _normalize_query(query: str) -> str:
+    if USE_POSTGRES:
+        return query.replace("?", "%s")
+    return query
+
+
+def _execute(cursor, query: str, params: tuple = ()):
+    cursor.execute(_normalize_query(query), params)
+
+
+def _connect():
+    if USE_POSTGRES:
+        if psycopg is None:
+            raise RuntimeError("psycopg is required when DATABASE_URL is set.")
+        return psycopg.connect(DATABASE_URL)
+
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
     return sqlite3.connect(DB_PATH)
 
 
-def create_user_database() -> Path:
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
-    is_new_database = not DB_PATH.exists()
+def _create_sqlite_schema(cursor) -> None:
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            money REAL NOT NULL DEFAULT 1000.00
+        )
+        """
+    )
 
+    cursor.execute("PRAGMA table_info(users)")
+    existing_columns = {row[1] for row in cursor.fetchall()}
+    if "password" not in existing_columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN password TEXT")
+    if "money" not in existing_columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN money REAL NOT NULL DEFAULT 1000.00")
+
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS user_follows (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL,
+            symbol TEXT NOT NULL,
+            UNIQUE(username, symbol)
+        )
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS user_holdings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL,
+            symbol TEXT NOT NULL,
+            shares INTEGER NOT NULL DEFAULT 0,
+            average_price REAL NOT NULL DEFAULT 0,
+            UNIQUE(username, symbol)
+        )
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS user_trades (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL,
+            symbol TEXT NOT NULL,
+            shares INTEGER NOT NULL,
+            remaining_shares INTEGER NOT NULL,
+            bought_price REAL NOT NULL,
+            bought_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            sold_price REAL,
+            sold_at DATETIME
+        )
+        """
+    )
+
+
+def _create_postgres_schema(cursor) -> None:
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS users (
+            id BIGSERIAL PRIMARY KEY,
+            username TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL DEFAULT '',
+            money DOUBLE PRECISION NOT NULL DEFAULT 1000.00
+        )
+        """
+    )
+    cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS password TEXT NOT NULL DEFAULT ''")
+    cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS money DOUBLE PRECISION NOT NULL DEFAULT 1000.00")
+
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS user_follows (
+            id BIGSERIAL PRIMARY KEY,
+            username TEXT NOT NULL,
+            symbol TEXT NOT NULL,
+            UNIQUE(username, symbol)
+        )
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS user_holdings (
+            id BIGSERIAL PRIMARY KEY,
+            username TEXT NOT NULL,
+            symbol TEXT NOT NULL,
+            shares INTEGER NOT NULL DEFAULT 0,
+            average_price DOUBLE PRECISION NOT NULL DEFAULT 0,
+            UNIQUE(username, symbol)
+        )
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS user_trades (
+            id BIGSERIAL PRIMARY KEY,
+            username TEXT NOT NULL,
+            symbol TEXT NOT NULL,
+            shares INTEGER NOT NULL,
+            remaining_shares INTEGER NOT NULL,
+            bought_price DOUBLE PRECISION NOT NULL,
+            bought_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            sold_price DOUBLE PRECISION,
+            sold_at TIMESTAMPTZ
+        )
+        """
+    )
+
+
+def create_user_database() -> str | Path:
     with _connect() as connection:
         cursor = connection.cursor()
-        if is_new_database:
-            cursor.execute(
-                """
-                CREATE TABLE users (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT NOT NULL UNIQUE,
-                    password TEXT NOT NULL,
-                    money REAL NOT NULL DEFAULT 1000.00
-                )
-                """
-            )
-            cursor.execute(
-                """
-                CREATE TABLE user_follows (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT NOT NULL,
-                    symbol TEXT NOT NULL,
-                    UNIQUE(username, symbol)
-                )
-                """
-            )
-            cursor.execute(
-                """
-                CREATE TABLE user_holdings (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT NOT NULL,
-                    symbol TEXT NOT NULL,
-                    shares INTEGER NOT NULL DEFAULT 0,
-                    average_price REAL NOT NULL DEFAULT 0,
-                    UNIQUE(username, symbol)
-                )
-                """
-            )
-            cursor.execute(
-                """
-                CREATE TABLE user_trades (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT NOT NULL,
-                    symbol TEXT NOT NULL,
-                    shares INTEGER NOT NULL,
-                    remaining_shares INTEGER NOT NULL,
-                    bought_price REAL NOT NULL,
-                    bought_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    sold_price REAL,
-                    sold_at DATETIME
-                )
-                """
-            )
-        else:
-            cursor.execute(
-                """
-                CREATE TABLE IF NOT EXISTS users (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT NOT NULL UNIQUE,
-                    password TEXT NOT NULL,
-                    money REAL NOT NULL DEFAULT 1000.00
-                )
-                """
-            )
+        if USE_POSTGRES:
+            _create_postgres_schema(cursor)
+            connection.commit()
+            return DATABASE_URL
 
-            cursor.execute("PRAGMA table_info(users)")
-            existing_columns = {row[1] for row in cursor.fetchall()}
-            if "password" not in existing_columns:
-                cursor.execute("ALTER TABLE users ADD COLUMN password TEXT")
-            if "money" not in existing_columns:
-                cursor.execute("ALTER TABLE users ADD COLUMN money REAL NOT NULL DEFAULT 1000.00")
-
-            cursor.execute(
-                """
-                CREATE TABLE IF NOT EXISTS user_follows (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT NOT NULL,
-                    symbol TEXT NOT NULL,
-                    UNIQUE(username, symbol)
-                )
-                """
-            )
-            cursor.execute(
-                """
-                CREATE TABLE IF NOT EXISTS user_holdings (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT NOT NULL,
-                    symbol TEXT NOT NULL,
-                    shares INTEGER NOT NULL DEFAULT 0,
-                    average_price REAL NOT NULL DEFAULT 0,
-                    UNIQUE(username, symbol)
-                )
-                """
-            )
-            cursor.execute(
-                """
-                CREATE TABLE IF NOT EXISTS user_trades (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT NOT NULL,
-                    symbol TEXT NOT NULL,
-                    shares INTEGER NOT NULL,
-                    remaining_shares INTEGER NOT NULL,
-                    bought_price REAL NOT NULL,
-                    bought_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    sold_price REAL,
-                    sold_at DATETIME
-                )
-                """
-            )
-
+        _create_sqlite_schema(cursor)
         connection.commit()
-
-    return DB_PATH
+        return DB_PATH
 
 
 def username_exists(username: str) -> bool:
     create_user_database()
     with _connect() as connection:
         cursor = connection.cursor()
-        cursor.execute("SELECT 1 FROM users WHERE username = ?", (username,))
+        _execute(cursor, "SELECT 1 FROM users WHERE username = ?", (username,))
         return cursor.fetchone() is not None
 
 
@@ -142,7 +173,8 @@ def signup_user(username: str, password: str) -> bool:
 
     with _connect() as connection:
         cursor = connection.cursor()
-        cursor.execute(
+        _execute(
+            cursor,
             "INSERT INTO users (username, password, money) VALUES (?, ?, ?)",
             (username, password, 1000.00),
         )
@@ -154,7 +186,8 @@ def login_user(username: str, password: str) -> bool:
     create_user_database()
     with _connect() as connection:
         cursor = connection.cursor()
-        cursor.execute(
+        _execute(
+            cursor,
             "SELECT 1 FROM users WHERE username = ? AND password = ?",
             (username, password),
         )
@@ -165,7 +198,7 @@ def get_user_money(username: str) -> float | None:
     create_user_database()
     with _connect() as connection:
         cursor = connection.cursor()
-        cursor.execute("SELECT money FROM users WHERE username = ?", (username,))
+        _execute(cursor, "SELECT money FROM users WHERE username = ?", (username,))
         row = cursor.fetchone()
         return float(row[0]) if row else None
 
@@ -174,7 +207,8 @@ def get_followed_symbols(username: str) -> list[str]:
     create_user_database()
     with _connect() as connection:
         cursor = connection.cursor()
-        cursor.execute(
+        _execute(
+            cursor,
             "SELECT symbol FROM user_follows WHERE username = ? ORDER BY symbol ASC",
             (username,),
         )
@@ -185,7 +219,8 @@ def get_user_holdings(username: str) -> list[dict]:
     create_user_database()
     with _connect() as connection:
         cursor = connection.cursor()
-        cursor.execute(
+        _execute(
+            cursor,
             """
             SELECT symbol, shares, average_price
             FROM user_holdings
@@ -208,7 +243,8 @@ def get_user_holding(username: str, symbol: str) -> dict | None:
     create_user_database()
     with _connect() as connection:
         cursor = connection.cursor()
-        cursor.execute(
+        _execute(
+            cursor,
             """
             SELECT symbol, shares, average_price
             FROM user_holdings
@@ -230,13 +266,22 @@ def list_users() -> list[dict]:
     create_user_database()
     with _connect() as connection:
         cursor = connection.cursor()
-        cursor.execute(
-            """
-            SELECT username, money
-            FROM users
-            ORDER BY username COLLATE NOCASE ASC
-            """
-        )
+        if USE_POSTGRES:
+            cursor.execute(
+                """
+                SELECT username, money
+                FROM users
+                ORDER BY LOWER(username) ASC, username ASC
+                """
+            )
+        else:
+            cursor.execute(
+                """
+                SELECT username, money
+                FROM users
+                ORDER BY username COLLATE NOCASE ASC
+                """
+            )
         return [
             {
                 "username": row[0],
@@ -250,10 +295,20 @@ def follow_stock(username: str, symbol: str) -> bool:
     create_user_database()
     with _connect() as connection:
         cursor = connection.cursor()
-        cursor.execute(
-            "INSERT OR IGNORE INTO user_follows (username, symbol) VALUES (?, ?)",
-            (username, symbol),
-        )
+        if USE_POSTGRES:
+            cursor.execute(
+                """
+                INSERT INTO user_follows (username, symbol)
+                VALUES (%s, %s)
+                ON CONFLICT (username, symbol) DO NOTHING
+                """,
+                (username, symbol),
+            )
+        else:
+            cursor.execute(
+                "INSERT OR IGNORE INTO user_follows (username, symbol) VALUES (?, ?)",
+                (username, symbol),
+            )
         connection.commit()
         return cursor.rowcount > 0
 
@@ -262,7 +317,8 @@ def unfollow_stock(username: str, symbol: str) -> bool:
     create_user_database()
     with _connect() as connection:
         cursor = connection.cursor()
-        cursor.execute(
+        _execute(
+            cursor,
             "DELETE FROM user_follows WHERE username = ? AND symbol = ?",
             (username, symbol),
         )
@@ -279,7 +335,7 @@ def buy_stock(username: str, symbol: str, shares: int, price: float) -> tuple[bo
 
     with _connect() as connection:
         cursor = connection.cursor()
-        cursor.execute("SELECT money FROM users WHERE username = ?", (username,))
+        _execute(cursor, "SELECT money FROM users WHERE username = ?", (username,))
         user_row = cursor.fetchone()
         if not user_row:
             return False, "User not found."
@@ -288,7 +344,8 @@ def buy_stock(username: str, symbol: str, shares: int, price: float) -> tuple[bo
         if current_money < total_cost:
             return False, "Not enough balance."
 
-        cursor.execute(
+        _execute(
+            cursor,
             "SELECT shares, average_price FROM user_holdings WHERE username = ? AND symbol = ?",
             (username, symbol),
         )
@@ -302,7 +359,8 @@ def buy_stock(username: str, symbol: str, shares: int, price: float) -> tuple[bo
                 ((existing_shares * existing_avg) + total_cost) / new_total_shares,
                 2,
             )
-            cursor.execute(
+            _execute(
+                cursor,
                 """
                 UPDATE user_holdings
                 SET shares = ?, average_price = ?
@@ -311,7 +369,8 @@ def buy_stock(username: str, symbol: str, shares: int, price: float) -> tuple[bo
                 (new_total_shares, new_average, username, symbol),
             )
         else:
-            cursor.execute(
+            _execute(
+                cursor,
                 """
                 INSERT INTO user_holdings (username, symbol, shares, average_price)
                 VALUES (?, ?, ?, ?)
@@ -319,14 +378,16 @@ def buy_stock(username: str, symbol: str, shares: int, price: float) -> tuple[bo
                 (username, symbol, shares, round(price, 2)),
             )
 
-        cursor.execute(
+        _execute(
+            cursor,
             """
             INSERT INTO user_trades (username, symbol, shares, remaining_shares, bought_price)
             VALUES (?, ?, ?, ?, ?)
             """,
             (username, symbol, shares, shares, round(price, 2)),
         )
-        cursor.execute(
+        _execute(
+            cursor,
             "UPDATE users SET money = ? WHERE username = ?",
             (round(current_money - total_cost, 2), username),
         )
@@ -341,7 +402,8 @@ def sell_stock(username: str, symbol: str, shares: int, price: float) -> tuple[b
     create_user_database()
     with _connect() as connection:
         cursor = connection.cursor()
-        cursor.execute(
+        _execute(
+            cursor,
             "SELECT shares, average_price FROM user_holdings WHERE username = ? AND symbol = ?",
             (username, symbol),
         )
@@ -354,13 +416,14 @@ def sell_stock(username: str, symbol: str, shares: int, price: float) -> tuple[b
         if shares > owned_shares:
             return False, "Not enough shares to sell."
 
-        cursor.execute("SELECT money FROM users WHERE username = ?", (username,))
+        _execute(cursor, "SELECT money FROM users WHERE username = ?", (username,))
         money_row = cursor.fetchone()
         if not money_row:
             return False, "User not found."
         current_money = float(money_row[0])
 
-        cursor.execute(
+        _execute(
+            cursor,
             """
             SELECT id, shares, remaining_shares, bought_price, bought_at
             FROM user_trades
@@ -372,14 +435,16 @@ def sell_stock(username: str, symbol: str, shares: int, price: float) -> tuple[b
         open_lots = cursor.fetchall()
 
         if not open_lots:
-            cursor.execute(
+            _execute(
+                cursor,
                 """
                 INSERT INTO user_trades (username, symbol, shares, remaining_shares, bought_price)
                 VALUES (?, ?, ?, ?, ?)
                 """,
                 (username, symbol, owned_shares, owned_shares, round(average_price, 2)),
             )
-            cursor.execute(
+            _execute(
+                cursor,
                 """
                 SELECT id, shares, remaining_shares, bought_price, bought_at
                 FROM user_trades
@@ -397,7 +462,8 @@ def sell_stock(username: str, symbol: str, shares: int, price: float) -> tuple[b
 
             lot_remaining = int(remaining_shares)
             if lot_remaining <= shares_to_sell:
-                cursor.execute(
+                _execute(
+                    cursor,
                     """
                     UPDATE user_trades
                     SET remaining_shares = 0, sold_price = ?, sold_at = CURRENT_TIMESTAMP
@@ -408,7 +474,8 @@ def sell_stock(username: str, symbol: str, shares: int, price: float) -> tuple[b
                 shares_to_sell -= lot_remaining
             else:
                 sold_shares = shares_to_sell
-                cursor.execute(
+                _execute(
+                    cursor,
                     """
                     INSERT INTO user_trades (
                         username, symbol, shares, remaining_shares, bought_price, bought_at, sold_price, sold_at
@@ -417,7 +484,8 @@ def sell_stock(username: str, symbol: str, shares: int, price: float) -> tuple[b
                     """,
                     (username, symbol, sold_shares, round(float(bought_price), 2), bought_at, round(price, 2)),
                 )
-                cursor.execute(
+                _execute(
+                    cursor,
                     """
                     UPDATE user_trades
                     SET shares = ?, remaining_shares = ?
@@ -429,7 +497,8 @@ def sell_stock(username: str, symbol: str, shares: int, price: float) -> tuple[b
 
         new_share_total = owned_shares - shares
         if new_share_total > 0:
-            cursor.execute(
+            _execute(
+                cursor,
                 """
                 UPDATE user_holdings
                 SET shares = ?
@@ -438,13 +507,15 @@ def sell_stock(username: str, symbol: str, shares: int, price: float) -> tuple[b
                 (new_share_total, username, symbol),
             )
         else:
-            cursor.execute(
+            _execute(
+                cursor,
                 "DELETE FROM user_holdings WHERE username = ? AND symbol = ?",
                 (username, symbol),
             )
 
         proceeds = round(shares * price, 2)
-        cursor.execute(
+        _execute(
+            cursor,
             "UPDATE users SET money = ? WHERE username = ?",
             (round(current_money + proceeds, 2), username),
         )
