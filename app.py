@@ -1,3 +1,4 @@
+import hashlib
 import os
 
 from flask import Flask, jsonify, render_template, request, session
@@ -102,12 +103,13 @@ def _build_leaderboard(current_username: str | None, stock_map: dict[str, dict])
 
 def _static_version(path: str) -> int:
     if not app.static_folder:
-        return 1
+        return "1"
     file_path = os.path.join(app.static_folder, path)
     try:
-        return int(os.path.getmtime(file_path))
+        with open(file_path, "rb") as file_handle:
+            return hashlib.sha1(file_handle.read()).hexdigest()[:12]
     except OSError:
-        return 1
+        return "1"
 
 
 @app.context_processor
