@@ -11,7 +11,7 @@ Required settings:
 - Start command: `gunicorn app:app`
 - Environment variable: `DATABASE_URL` (your Neon connection string)
 - Environment variable: `FINNHUB_API_KEY`
-- Environment variable: `FLASK_SECRET_KEY` (the Blueprint can generate this)
+- Environment variable: `FLASK_SECRET_KEY` (set this yourself to one fixed random value and keep it stable)
 - Environment variable: `STOCKVERSE_DATA_DIR=/tmp/stockverse`
 
 Important:

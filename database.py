@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import threading
 from pathlib import Path
 
 try:
@@ -12,6 +13,8 @@ DATA_DIR = Path(os.getenv("STOCKVERSE_DATA_DIR", str(BASE_DIR / "data"))).expand
 DB_PATH = DATA_DIR / "stockverse.db"
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 USE_POSTGRES = bool(DATABASE_URL)
+_schema_lock = threading.Lock()
+_schema_initialized = False
 
 
 def _normalize_query(query: str) -> str:
@@ -146,16 +149,26 @@ def _create_postgres_schema(cursor) -> None:
 
 
 def create_user_database() -> str | Path:
-    with _connect() as connection:
-        cursor = connection.cursor()
-        if USE_POSTGRES:
-            _create_postgres_schema(cursor)
-            connection.commit()
-            return DATABASE_URL
+    global _schema_initialized
+    if _schema_initialized:
+        return DATABASE_URL if USE_POSTGRES else DB_PATH
 
-        _create_sqlite_schema(cursor)
-        connection.commit()
-        return DB_PATH
+    with _schema_lock:
+        if _schema_initialized:
+            return DATABASE_URL if USE_POSTGRES else DB_PATH
+
+        with _connect() as connection:
+            cursor = connection.cursor()
+            if USE_POSTGRES:
+                _create_postgres_schema(cursor)
+                connection.commit()
+                _schema_initialized = True
+                return DATABASE_URL
+
+            _create_sqlite_schema(cursor)
+            connection.commit()
+            _schema_initialized = True
+            return DB_PATH
 
 
 def username_exists(username: str) -> bool:
