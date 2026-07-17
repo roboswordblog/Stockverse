@@ -333,16 +333,6 @@
         ctx.strokeStyle = '#2ef26f';
         ctx.lineWidth = 3;
         ctx.stroke();
-
-        ctx.lineTo(width, height);
-        ctx.lineTo(0, height);
-        ctx.closePath();
-
-        const gradient = ctx.createLinearGradient(0, 0, 0, height);
-        gradient.addColorStop(0, 'rgba(46, 242, 111, 0.22)');
-        gradient.addColorStop(1, 'rgba(46, 242, 111, 0)');
-        ctx.fillStyle = gradient;
-        ctx.fill();
     }
 
     function renderPulse(stocks) {

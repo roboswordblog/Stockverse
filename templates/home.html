@@ -22,18 +22,6 @@
             </nav>
 
             <section class="sidebar-panel">
-                <p class="sidebar-label">Account</p>
-                <div class="sidebar-stat state-positive">
-                    <span>Balance</span>
-                    <strong id="accountBalance">Loading...</strong>
-                </div>
-                <div class="sidebar-stat state-caution">
-                    <span>Market Update</span>
-                    <strong id="marketUpdateStatus">Checking...</strong>
-                </div>
-            </section>
-
-            <section class="sidebar-panel">
                 <p class="sidebar-label">Actions</p>
                 <div class="sidebar-actions">
                     <button id="resetAccountButton" class="ghost-btn" type="button">Reset Account</button>
@@ -69,6 +57,10 @@
                     <p class="subtle">Track the market, review your positions, and move between trading, learning, and account settings without losing context.</p>
                 </div>
                 <div class="home-header-tools">
+                    <div class="header-balance">
+                        <span>Current Balance</span>
+                        <strong id="accountBalance">Loading...</strong>
+                    </div>
                     <div class="header-stock-search">
                         <input id="topStockSearchInput" type="text" placeholder="Search stocks">
                         <button id="topStockSearchGo" class="primary-btn" type="button">Search</button>
