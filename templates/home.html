@@ -8,29 +8,45 @@
 </head>
 <body>
 <div id="home" class="home-shell">
-    <header class="home-header">
-        <div>
-            <p class="eyebrow">Stockverse</p>
-            <h1>Market Home</h1>
-            <p class="subtle">Welcome back, <span id="welcomeName">{{ username }}</span>.</p>
+    <header class="dashboard-topbar">
+        <div class="dashboard-brand">
+            <a class="brand-link" href="/home">Stockverse</a>
+            <p>Trading Lab</p>
         </div>
-        <div class="header-meta">
+        <nav class="dashboard-nav" aria-label="Primary">
+            <a class="nav-link is-active" href="/home">Home</a>
+            <a class="nav-link" href="/guide">Guide</a>
+            <a class="nav-link" href="/profile">Settings</a>
+        </nav>
+        <div class="topbar-actions">
+            <button id="refreshOverview" class="ghost-btn" type="button">Refresh</button>
+            <button id="logoutButton" class="ghost-btn" type="button">Log Out</button>
+        </div>
+    </header>
+
+    <section class="home-header">
+        <div class="home-header-copy">
+            <p class="eyebrow">Stockverse Dashboard</p>
+            <h1>Welcome back, <span id="welcomeName">{{ username }}</span>.</h1>
+            <p class="subtle">Track the market, review your holdings, and move into the guide or account settings without leaving the dashboard.</p>
+        </div>
+        <div class="home-header-tools">
             <div class="header-stock-search">
                 <input id="topStockSearchInput" type="text" placeholder="Search stocks">
                 <button id="topStockSearchGo" class="primary-btn" type="button">Search</button>
             </div>
-            <a class="ghost-btn" href="/guide">Guide</a>
-            <button id="refreshOverview" class="ghost-btn" type="button">Refresh</button>
-            <div class="balance-card">
-                <span>Balance</span>
-                <strong id="accountBalance">Loading...</strong>
-            </div>
-            <div class="balance-card">
-                <span>Market Update</span>
-                <strong id="marketUpdateStatus">Checking...</strong>
+            <div class="header-summary-grid">
+                <div class="balance-card">
+                    <span>Balance</span>
+                    <strong id="accountBalance">Loading...</strong>
+                </div>
+                <div class="balance-card">
+                    <span>Market Update</span>
+                    <strong id="marketUpdateStatus">Checking...</strong>
+                </div>
             </div>
         </div>
-    </header>
+    </section>
 
     <main class="dashboard-grid">
         <section class="panel top-stocks-panel">
@@ -263,6 +279,7 @@
     const accountBalance = document.getElementById('accountBalance');
     const marketUpdateStatus = document.getElementById('marketUpdateStatus');
     const refreshOverview = document.getElementById('refreshOverview');
+    const logoutButton = document.getElementById('logoutButton');
     const topStocksList = document.getElementById('topStocksList');
     const followedStocksList = document.getElementById('followedStocksList');
     const holdingsList = document.getElementById('holdingsList');
@@ -848,6 +865,13 @@
     backToHome.addEventListener('click', showHome);
     if (refreshOverview) {
         refreshOverview.addEventListener('click', () => loadOverview());
+    }
+    if (logoutButton) {
+        logoutButton.addEventListener('click', async () => {
+            const response = await fetch('/logout', { method: 'POST' });
+            const data = await response.json();
+            window.location.href = (data && data.redirect_url) || '/';
+        });
     }
     if (historyRangeSwitch) {
         historyRangeSwitch.addEventListener('click', (event) => {

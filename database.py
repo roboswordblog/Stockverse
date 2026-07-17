@@ -207,6 +207,94 @@ def login_user(username: str, password: str) -> bool:
         return cursor.fetchone() is not None
 
 
+def change_username(current_username: str, password: str, new_username: str) -> tuple[bool, str]:
+    create_user_database()
+    normalized_username = new_username.strip()
+    if not normalized_username:
+        return False, "New username is required."
+    if current_username == normalized_username:
+        return False, "Choose a different username."
+    if not login_user(current_username, password):
+        return False, "Current password is incorrect."
+    if username_exists(normalized_username):
+        return False, "Username is already taken."
+
+    with _connect() as connection:
+        cursor = connection.cursor()
+        _execute(
+            cursor,
+            "UPDATE users SET username = ? WHERE username = ?",
+            (normalized_username, current_username),
+        )
+        if cursor.rowcount == 0:
+            return False, "User not found."
+
+        for table_name in ("user_follows", "user_holdings", "user_trades"):
+            _execute(
+                cursor,
+                f"UPDATE {table_name} SET username = ? WHERE username = ?",
+                (normalized_username, current_username),
+            )
+        connection.commit()
+    return True, "Username updated successfully."
+
+
+def change_password(username: str, current_password: str, new_password: str) -> tuple[bool, str]:
+    create_user_database()
+    if not login_user(username, current_password):
+        return False, "Current password is incorrect."
+    if not new_password.strip():
+        return False, "New password is required."
+
+    with _connect() as connection:
+        cursor = connection.cursor()
+        _execute(
+            cursor,
+            "UPDATE users SET password = ? WHERE username = ?",
+            (new_password.strip(), username),
+        )
+        if cursor.rowcount == 0:
+            return False, "User not found."
+        connection.commit()
+    return True, "Password updated successfully."
+
+
+def reset_account(username: str, password: str) -> tuple[bool, str]:
+    create_user_database()
+    if not login_user(username, password):
+        return False, "Current password is incorrect."
+
+    with _connect() as connection:
+        cursor = connection.cursor()
+        for table_name in ("user_follows", "user_holdings", "user_trades"):
+            _execute(cursor, f"DELETE FROM {table_name} WHERE username = ?", (username,))
+        _execute(
+            cursor,
+            "UPDATE users SET money = ? WHERE username = ?",
+            (1000.00, username),
+        )
+        if cursor.rowcount == 0:
+            return False, "User not found."
+        connection.commit()
+    return True, "Account reset successfully."
+
+
+def delete_account(username: str, password: str) -> tuple[bool, str]:
+    create_user_database()
+    if not login_user(username, password):
+        return False, "Current password is incorrect."
+
+    with _connect() as connection:
+        cursor = connection.cursor()
+        for table_name in ("user_follows", "user_holdings", "user_trades"):
+            _execute(cursor, f"DELETE FROM {table_name} WHERE username = ?", (username,))
+        _execute(cursor, "DELETE FROM users WHERE username = ?", (username,))
+        if cursor.rowcount == 0:
+            return False, "User not found."
+        connection.commit()
+    return True, "Account deleted successfully."
+
+
 def get_user_money(username: str) -> float | None:
     create_user_database()
     with _connect() as connection:

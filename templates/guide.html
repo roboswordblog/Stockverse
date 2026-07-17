@@ -15,12 +15,13 @@
         </div>
         <div class="topbar-actions">
             {% if username %}
-            <a class="ghost-btn" href="/home">Trading Lab</a>
-            <a class="primary-btn" href="/home">Open Portfolio</a>
+            <a class="ghost-btn" href="{{ home_target }}">Trading Lab</a>
+            <a class="ghost-btn" href="/profile">Settings</a>
+            <a class="primary-btn" href="{{ home_target }}">Open Portfolio</a>
             {% else %}
-            <a class="ghost-btn" href="/">Home</a>
-            <a class="ghost-btn" href="/#login">Log In</a>
-            <a class="primary-btn" href="/#signup">Sign Up</a>
+            <a class="ghost-btn" href="{{ home_target }}">Home</a>
+            <a class="ghost-btn" href="/login">Log In</a>
+            <a class="primary-btn" href="/signup">Sign Up</a>
             {% endif %}
         </div>
     </header>
@@ -33,9 +34,9 @@
         </div>
         <div class="header-actions">
             {% if username %}
-            <a class="ghost-btn" href="/home">Back to Trading Lab</a>
+            <a class="ghost-btn" href="{{ home_target }}">Back to Trading Lab</a>
             {% else %}
-            <a class="ghost-btn" href="/">Back Home</a>
+            <a class="ghost-btn" href="{{ home_target }}">Back Home</a>
             {% endif %}
             <button class="primary-btn" type="button" data-jump-step="0">Open Guide</button>
         </div>

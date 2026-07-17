@@ -3,76 +3,82 @@
 }
 
 :root {
-    --bg-main: #000000;
-    --bg-surface: #000000;
-    --bg-panel: #000000;
-    --bg-panel-soft: #000000;
-    --border: #263a31;
-    --border-strong: #365645;
-    --text-main: #e4ebe7;
-    --text-muted: #9fafaa;
-    --accent: #2ef26f;
-    --accent-strong: #1ecb59;
+    --bg-main: #020705;
+    --bg-surface: #07100c;
+    --bg-panel: #0a1510;
+    --bg-panel-soft: #0d1913;
+    --border: #274136;
+    --border-strong: #355a48;
+    --text-main: #e8f3ec;
+    --text-muted: #95ad9f;
+    --accent: #39df7b;
+    --accent-strong: #2ac566;
     --accent-text: #041008;
 }
 
 body {
     margin: 0;
     font-family: "Segoe UI", Arial, sans-serif;
-    background: #000000;
+    background: var(--bg-main);
     color: var(--text-main);
 }
 
-#index {
+.page-shell {
     min-height: 100vh;
-    padding: 32px clamp(18px, 4vw, 56px) 48px;
-    max-width: 1180px;
+    padding: 18px clamp(16px, 4vw, 44px) 44px;
+    max-width: 1240px;
     margin: 0 auto;
 }
 
 .view-section {
     width: 100%;
-    padding: 28px clamp(18px, 4vw, 56px) 44px;
-    max-width: 1180px;
-    margin: 0 auto;
+    margin-top: 18px;
 }
 
-.site-header {
+.site-navbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: 18px;
     flex-wrap: wrap;
-    margin-bottom: 40px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
+    padding: 16px 18px;
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
     position: sticky;
-    top: 0;
-    background: #000000;
+    top: 18px;
+    background: rgba(7, 16, 12, 0.94);
     backdrop-filter: blur(12px);
     z-index: 5;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
 }
 
-.brand-wrap h1 {
+.navbar-brand {
+    display: grid;
+    gap: 6px;
+}
+
+.brand-link {
+    color: var(--text-main);
+    font-size: 1.15rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.navbar-brand p {
     margin: 0;
-    font-size: clamp(1.5rem, 2.4vw, 2rem);
-    color: #f0f4f2;
-}
-
-.brand-wrap p {
-    margin: 8px 0 0;
     color: var(--text-muted);
-    max-width: 620px;
+    max-width: 520px;
 }
 
-.site-header-actions {
+.navbar-links,
+.navbar-actions {
     display: flex;
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
 }
 
-.header-cta,
+.nav-link,
 .ghost-btn,
 .primary-btn,
 .secondary-btn,
@@ -80,32 +86,57 @@ body {
     line-height: 1;
 }
 
-.header-cta {
+.nav-link {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    text-decoration: none;
-    background: var(--accent);
-    color: var(--accent-text);
-    min-height: 42px;
-    padding: 11px 16px;
+    min-height: 40px;
+    padding: 9px 12px;
     border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-muted);
     font-weight: 600;
-    border: 1px solid #67ff9a;
+    font: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.nav-link:hover,
+.nav-link.is-active {
+    color: var(--text-main);
+    border-color: var(--border);
+    background: rgba(57, 223, 123, 0.08);
 }
 
 .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.9fr);
+    gap: 18px;
     background: var(--bg-surface);
     border: 1px solid var(--border-strong);
-    border-radius: 8px;
+    border-radius: 10px;
     padding: clamp(20px, 3vw, 34px);
     box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
 }
 
+.eyebrow {
+    margin: 0 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.78rem;
+    color: var(--accent);
+}
+
+.hero h1,
 .hero h2 {
     margin: 0;
-    font-size: clamp(1.4rem, 3vw, 2rem);
-    color: #edf2ef;
+    color: var(--text-main);
+}
+
+.hero h1 {
+    font-size: clamp(1.8rem, 3.8vw, 3rem);
+    line-height: 1.08;
 }
 
 .hero p {
@@ -123,19 +154,57 @@ body {
     gap: 12px;
 }
 
+.hero-panel,
 .market-preview {
     margin-top: 16px;
     background: var(--bg-surface);
     border: 1px solid var(--border-strong);
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 18px;
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16);
 }
 
+.hero-panel {
+    margin-top: 0;
+}
+
+.hero-panel h2 {
+    font-size: 1.05rem;
+}
+
+.hero-panel-grid {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.hero-metric {
+    background: var(--bg-panel-soft);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+}
+
+.hero-metric span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    margin-bottom: 6px;
+}
+
 .preview-head h3 {
     margin: 0;
-    color: #edf2ef;
+    color: var(--text-main);
     font-size: 1.1rem;
+}
+
+.preview-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
 }
 
 .preview-head p {
@@ -147,9 +216,9 @@ body {
 #marketChart {
     width: 100%;
     margin-top: 12px;
-    background: #000000;
+    background: #041008;
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 10px;
     display: block;
 }
 
@@ -196,6 +265,7 @@ body {
     cursor: pointer;
     border: 1px solid transparent;
     text-decoration: none;
+    font: inherit;
 }
 
 .ghost-btn {
@@ -207,10 +277,24 @@ body {
     border: 1px solid var(--border);
     border-radius: 8px;
     background: var(--bg-panel);
-    color: #d0dbd5;
+    color: var(--text-main);
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 600;
+    font: inherit;
+    cursor: pointer;
+}
+
+.primary-btn {
+    background: var(--accent);
+    color: var(--accent-text);
+    border-color: #67ff9a;
+}
+
+.secondary-btn {
+    background: var(--bg-panel-soft);
+    color: #d5e3dc;
+    border-color: var(--border-strong);
 }
 
 .market-shell {
@@ -226,7 +310,7 @@ body {
     flex-wrap: wrap;
     background: var(--bg-surface);
     border: 1px solid var(--border-strong);
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 22px;
     box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
 }
@@ -234,7 +318,7 @@ body {
 .market-toolbar h2 {
     margin: 0;
     font-size: 1.8rem;
-    color: #edf2ef;
+    color: var(--text-main);
 }
 
 .market-toolbar p {
@@ -260,7 +344,7 @@ body {
 .summary-card {
     background: var(--bg-panel);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 14px 16px;
 }
 
@@ -279,7 +363,7 @@ body {
 .market-board {
     background: var(--bg-surface);
     border: 1px solid var(--border-strong);
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
 }
@@ -341,18 +425,6 @@ body {
     padding: 12px 8px;
 }
 
-.primary-btn {
-    background: var(--accent);
-    color: var(--accent-text);
-    border-color: #67ff9a;
-}
-
-.secondary-btn {
-    background: var(--bg-panel);
-    color: #c5d3cc;
-    border-color: var(--border-strong);
-}
-
 .auth-panel {
     margin-top: 8px;
     background: var(--bg-surface);
@@ -364,20 +436,17 @@ body {
 
 .auth-shell {
     max-width: 560px;
-    margin: 42px auto;
+    margin: 24px auto 0;
     background: var(--bg-surface);
     border: 1px solid var(--border-strong);
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 24px;
     box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
 }
 
-.auth-topbar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 16px;
+.auth-intro {
+    display: grid;
+    gap: 6px;
 }
 
 .auth-shell h2 {
@@ -578,7 +647,7 @@ body {
     line-height: 1.45;
 }
 
-.header-cta:hover,
+.nav-link:hover,
 .ghost-btn:hover,
 .inline-link:hover,
 .primary-btn:hover,
@@ -591,9 +660,26 @@ body {
 }
 
 @media (max-width: 760px) {
-    #index,
+    .page-shell,
     .view-section {
-        padding: 18px 16px 28px;
+        padding: 0;
+        margin-top: 16px;
+    }
+
+    .page-shell {
+        padding: 16px;
+    }
+
+    .hero {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-panel-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .site-navbar {
+        top: 16px;
     }
 
     .market-board-head,

@@ -1,10 +1,36 @@
 import hashlib
 import os
+from datetime import timedelta
+from pathlib import Path
 
-from flask import Flask, jsonify, render_template, request, session
+def _load_local_env() -> None:
+    env_path = Path(__file__).resolve().parent / "api.env"
+    if not env_path.exists():
+        return
+
+    try:
+        with env_path.open("r", encoding="utf-8") as env_file:
+            for raw_line in env_file:
+                line = raw_line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                key, value = line.split("=", 1)
+                key = key.strip()
+                if key and key not in os.environ:
+                    os.environ[key] = value.strip()
+    except OSError:
+        return
+
+
+_load_local_env()
+
+from flask import Flask, jsonify, redirect, render_template, request, session, url_for
 from database import (
     buy_stock,
+    change_password,
+    change_username,
     create_user_database,
+    delete_account,
     follow_stock,
     get_followed_symbols,
     get_user_holding,
@@ -12,6 +38,7 @@ from database import (
     get_user_money,
     list_users,
     login_user,
+    reset_account,
     sell_stock,
     signup_user,
     unfollow_stock,
@@ -29,8 +56,15 @@ from dataCollection import (
 
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "stockverse-dev-secret")
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.permanent_session_lifetime = timedelta(days=30)
 create_user_database()
 
+
+def _login_user_session(username: str) -> None:
+    session["username"] = username
+    session.permanent = True
 
 
 def _current_username() -> str | None:
@@ -116,14 +150,39 @@ def _static_version(path: str) -> int:
 def inject_static_version():
     return {"static_version": _static_version}
 
+
 @app.route('/')
 def index():
-    return render_template('index.html')
+    username = _current_username()
+    if username:
+        return redirect(url_for("home"))
+    return render_template('index.html', initial_section='index')
+
+
+@app.route('/login', methods=['GET'])
+def login_page():
+    username = _current_username()
+    if username:
+        return redirect(url_for("home"))
+    return render_template('index.html', initial_section='login')
+
+
+@app.route('/signup', methods=['GET'])
+def signup_page():
+    username = _current_username()
+    if username:
+        return redirect(url_for("home"))
+    return render_template('index.html', initial_section='signup')
 
 
 @app.route('/guide')
 def guide():
-    return render_template('guide.html', username=_current_username())
+    username = _current_username()
+    return render_template(
+        'guide.html',
+        username=username,
+        home_target=url_for("home") if username else url_for("index"),
+    )
 
 @app.route('/usernameThere')
 def username_there():
@@ -149,8 +208,8 @@ def signup():
     if not created:
         return jsonify({'ok': False, 'error': 'Unable to create account.'}), 500
 
-    session.pop("username", None)
-    return jsonify({'ok': True, 'username': username})
+    _login_user_session(username)
+    return jsonify({'ok': True, 'username': username, 'redirect_url': url_for("home")})
 
 
 @app.route('/login', methods=['POST'])
@@ -165,15 +224,29 @@ def login():
     if not login_user(username, password):
         return jsonify({'ok': False, 'error': 'Invalid username or password.'}), 401
 
-    session["username"] = username
-    return jsonify({'ok': True})
+    _login_user_session(username)
+    return jsonify({'ok': True, 'username': username, 'redirect_url': url_for("home")})
+
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return jsonify({'ok': True, 'redirect_url': url_for("index")})
 
 @app.route('/home')
 def home():
     username = _current_username()
     if not username:
-        return render_template('index.html')
+        return redirect(url_for("login_page"))
     return render_template('home.html', username=username)
+
+
+@app.route('/profile')
+def profile():
+    username = _current_username()
+    if not username:
+        return redirect(url_for("login_page"))
+    return render_template('profile.html', username=username, balance=get_user_money(username))
 
 @app.route('/getAllPrices')
 def getAllPrices():
@@ -341,6 +414,89 @@ def search_stock_list():
 
     query = (request.args.get("q") or "").strip()
     return jsonify({"ok": True, "results": search_stocks(query)})
+
+
+@app.route('/api/account')
+def account_details():
+    username = _current_username()
+    if not username:
+        return jsonify({"ok": False, "error": "Not logged in."}), 401
+
+    return jsonify(
+        {
+            "ok": True,
+            "username": username,
+            "balance": get_user_money(username),
+        }
+    )
+
+
+@app.route('/api/account/username', methods=['POST'])
+def account_change_username():
+    username = _current_username()
+    if not username:
+        return jsonify({"ok": False, "error": "Not logged in."}), 401
+
+    data = request.get_json(silent=True) or {}
+    password = (data.get("password") or "").strip()
+    new_username = (data.get("new_username") or "").strip()
+    if len(new_username) < 3:
+        return jsonify({"ok": False, "error": "Username must be at least 3 characters."}), 400
+
+    success, message = change_username(username, password, new_username)
+    if not success:
+        return jsonify({"ok": False, "error": message}), 400
+
+    _login_user_session(new_username)
+    return jsonify({"ok": True, "message": message, "username": new_username})
+
+
+@app.route('/api/account/password', methods=['POST'])
+def account_change_password():
+    username = _current_username()
+    if not username:
+        return jsonify({"ok": False, "error": "Not logged in."}), 401
+
+    data = request.get_json(silent=True) or {}
+    current_password = (data.get("current_password") or "").strip()
+    new_password = (data.get("new_password") or "").strip()
+    if len(new_password) < 6:
+        return jsonify({"ok": False, "error": "Password must be at least 6 characters."}), 400
+
+    success, message = change_password(username, current_password, new_password)
+    if not success:
+        return jsonify({"ok": False, "error": message}), 400
+    return jsonify({"ok": True, "message": message})
+
+
+@app.route('/api/account/reset', methods=['POST'])
+def account_reset():
+    username = _current_username()
+    if not username:
+        return jsonify({"ok": False, "error": "Not logged in."}), 401
+
+    data = request.get_json(silent=True) or {}
+    password = (data.get("password") or "").strip()
+    success, message = reset_account(username, password)
+    if not success:
+        return jsonify({"ok": False, "error": message}), 400
+    return jsonify({"ok": True, "message": message, "balance": get_user_money(username)})
+
+
+@app.route('/api/account/delete', methods=['POST'])
+def account_delete():
+    username = _current_username()
+    if not username:
+        return jsonify({"ok": False, "error": "Not logged in."}), 401
+
+    data = request.get_json(silent=True) or {}
+    password = (data.get("password") or "").strip()
+    success, message = delete_account(username, password)
+    if not success:
+        return jsonify({"ok": False, "error": message}), 400
+
+    session.clear()
+    return jsonify({"ok": True, "message": message, "redirect_url": url_for("index")})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

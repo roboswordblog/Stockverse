@@ -7,37 +7,68 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/index.css', v=static_version('styles/index.css')) }}">
 </head>
 <body>
-<div id="index" class="view-section">
-    <header class="site-header">
-        <div class="brand-wrap">
-            <h1>Stockverse</h1>
-            <p>Practice investing with live market data and zero risk.</p>
+<div class="page-shell">
+    <header class="site-navbar">
+        <div class="navbar-brand">
+            <a class="brand-link" href="/">Stockverse</a>
+            <p>Practice investing with real market movement and zero capital at risk.</p>
         </div>
-        <div class="site-header-actions">
-            <a class="ghost-btn" href="/guide">Beginner Guide</a>
-            <a class="header-cta section-link" href="#" data-section="market">See Market</a>
+        <nav class="navbar-links" aria-label="Primary">
+            <a class="nav-link" href="/">Home</a>
+            <button class="nav-link section-link" type="button" data-section="market">Market</button>
+            <a class="nav-link" href="/guide">Guide</a>
+        </nav>
+        <div class="navbar-actions">
+            <a class="ghost-btn" href="/signup">Sign Up</a>
+            <a class="primary-btn" href="/login">Log In</a>
         </div>
     </header>
 
-    <main>
+    <div id="index" class="view-section">
         <section class="hero">
-            <h2>Trade Smarter Before You Trade Real</h2>
-            <p>
-                Build confidence by managing a virtual portfolio powered by real-time stock movement.
-                Test strategies, watch positions update live, and learn how market behavior impacts your returns.
-            </p>
-            <div class="hero-actions">
-                <a class="ghost-btn" href="/guide">Read the Guide</a>
-                <a class="primary-btn section-link" href="#" data-section="market">See Market</a>
-                <a class="secondary-btn section-link" href="#" data-section="signup">Sign Up</a>
-                <a class="secondary-btn section-link" href="#" data-section="login">Log In</a>
+            <div class="hero-copy">
+                <p class="eyebrow">Stockverse</p>
+                <h1>Learn the process first. Practice the trades second.</h1>
+                <p>
+                    Stockverse gives new investors one place to study the guide, scan live prices, and build a virtual portfolio that behaves like a real one.
+                </p>
+                <div class="hero-actions">
+                    <a class="primary-btn" href="/signup">Create Account</a>
+                    <a class="ghost-btn" href="/login">Log In</a>
+                    <button class="secondary-btn section-link" type="button" data-section="market">Open Market Board</button>
+                    <a class="secondary-btn" href="/guide">Read the Guide</a>
+                </div>
             </div>
+            <aside class="hero-panel">
+                <h2>What you get</h2>
+                <div class="hero-panel-grid">
+                    <article class="hero-metric">
+                        <span>Starter Balance</span>
+                        <strong>1000 USD</strong>
+                    </article>
+                    <article class="hero-metric">
+                        <span>Quotes</span>
+                        <strong>Real-Time Feed</strong>
+                    </article>
+                    <article class="hero-metric">
+                        <span>Training Flow</span>
+                        <strong>Guide + Dashboard</strong>
+                    </article>
+                    <article class="hero-metric">
+                        <span>Risk</span>
+                        <strong>Zero Real Money</strong>
+                    </article>
+                </div>
+            </aside>
         </section>
 
         <section class="market-preview">
             <div class="preview-head">
-                <h3>Live Market Pulse</h3>
-                <p>Experience real-time volatility and test your strategy before using real money.</p>
+                <div>
+                    <h3>Live Market Pulse</h3>
+                    <p>Review the tape before you open an account. The same feed powers the practice portfolio.</p>
+                </div>
+                <button class="ghost-btn section-link" type="button" data-section="market">Full Market</button>
             </div>
             <canvas id="marketChart" width="900" height="260" aria-label="Market chart preview"></canvas>
             <div id="pulseTickerRow" class="ticker-row">
@@ -47,35 +78,16 @@
 
         <section class="reasons-grid">
             <article class="reason-card">
-                <h3>Start Without Risk</h3>
-                <p>Every new account starts with 1000 USD in simulated funds so you can learn safely.</p>
+                <h3>Clean path from signup to trading</h3>
+                <p>Create the account once and go straight into the dashboard. No extra login step after signup.</p>
             </article>
             <article class="reason-card">
-                <h3>Learn Through Real Data</h3>
-                <p>Practice in real market conditions instead of fake static examples or delayed prices.</p>
+                <h3>Guide before execution</h3>
+                <p>The guide and market board stay close to the portfolio so beginners do not get lost between pages.</p>
             </article>
             <article class="reason-card">
-                <h3>Build Repeatable Discipline</h3>
-                <p>Track what worked, what failed, and improve your entry/exit decisions over time.</p>
-            </article>
-        </section>
-
-        <section class="stats-strip">
-            <article class="stat-item">
-                <p class="stat-value">1000 USD</p>
-                <p class="stat-label">Starter Balance</p>
-            </article>
-            <article class="stat-item">
-                <p class="stat-value">Real-Time</p>
-                <p class="stat-label">Price Tracking</p>
-            </article>
-            <article class="stat-item">
-                <p class="stat-value">Zero Risk</p>
-                <p class="stat-label">Practice Mode</p>
-            </article>
-            <article class="stat-item">
-                <p class="stat-value">24/7</p>
-                <p class="stat-label">Strategy Testing</p>
+                <h3>Persistent session</h3>
+                <p>Your login stays active, so reopening the site brings you back to the trading flow instead of forcing repeated sign-ins.</p>
             </article>
         </section>
 
@@ -86,145 +98,149 @@
             </article>
             <article class="overview-card">
                 <h3>Virtual Cash</h3>
-                <p>Start with fake funds, execute orders, and measure risk with no real-world downside.</p>
+                <p>Start with fake funds, execute orders, and measure risk without real-world downside.</p>
             </article>
             <article class="overview-card">
-                <h3>Performance Analytics</h3>
-                <p>See gains, losses, and allocation breakdowns to understand what drives outcomes.</p>
+                <h3>Portfolio Review</h3>
+                <p>Track gains, losses, and holdings in one dashboard instead of jumping across disconnected screens.</p>
             </article>
             <article class="overview-card">
-                <h3>Strategy Testing</h3>
-                <p>Experiment with long-term and short-term ideas before making real financial decisions.</p>
+                <h3>Account Controls</h3>
+                <p>Change your username, password, or reset the account from a dedicated settings page.</p>
             </article>
         </section>
 
         <section class="journey-grid">
             <article class="journey-card">
                 <span class="step-tag">01</span>
-                <h3>Create Your Profile</h3>
-                <p>Join in seconds, choose your username, and get your virtual capital instantly.</p>
+                <h3>Create the account</h3>
+                <p>Pick a username and password once. Stockverse signs you in immediately.</p>
             </article>
             <article class="journey-card">
                 <span class="step-tag">02</span>
-                <h3>Pick Stocks to Watch</h3>
-                <p>Track symbols and follow short-term moves before committing to a strategy.</p>
+                <h3>Use the guide</h3>
+                <p>Read the training material before you start placing simulated trades.</p>
             </article>
             <article class="journey-card">
                 <span class="step-tag">03</span>
-                <h3>Place Simulated Trades</h3>
-                <p>Buy and sell with fake money to learn execution timing and position sizing.</p>
+                <h3>Trade the dashboard</h3>
+                <p>Search symbols, follow stocks, and manage positions from the same home page.</p>
             </article>
             <article class="journey-card">
                 <span class="step-tag">04</span>
-                <h3>Review and Improve</h3>
-                <p>Analyze outcomes, refine your approach, and build consistency over time.</p>
+                <h3>Adjust your account</h3>
+                <p>Open Settings from the dashboard to update credentials, reset progress, or remove the account.</p>
             </article>
         </section>
-    </main>
-</div>
-<div id="signup" class="view-section is-hidden">
-    <section class="auth-shell">
-        <div class="auth-topbar">
-            <a class="ghost-btn section-link" href="#" data-section="index">Back Home</a>
-            <a class="ghost-btn section-link" href="#" data-section="login">Log In</a>
-        </div>
-        <h2>Create Your Trading Account</h2>
-        <p>Claim your username, set a password, and start with 1000 USD in virtual funds.</p>
-        <form id="signupForm" class="auth-form" novalidate>
-            <label for="signupUsername">Username</label>
-            <input id="signupUsername" name="username" type="text" minlength="3" maxlength="30" autocomplete="username" required>
-            <p id="signupUsernameError" class="form-error is-hidden"></p>
+    </div>
 
-            <label for="signupPassword">Password</label>
-            <input id="signupPassword" name="password" type="password" minlength="6" maxlength="128" autocomplete="new-password" required>
-            <p id="signupPasswordError" class="form-error is-hidden"></p>
+    <div id="signup" class="view-section is-hidden">
+        <section class="auth-shell">
+            <div class="auth-intro">
+                <p class="eyebrow">Create Account</p>
+                <h2>Create your trading account</h2>
+                <p>Set the account up once and go straight into the dashboard with 1000 USD in simulated funds.</p>
+            </div>
+            <form id="signupForm" class="auth-form" novalidate>
+                <label for="signupUsername">Username</label>
+                <input id="signupUsername" name="username" type="text" minlength="3" maxlength="30" autocomplete="username" required>
+                <p id="signupUsernameError" class="form-error is-hidden"></p>
 
-            <button id="signupSubmit" type="submit" class="primary-btn">Create Account</button>
-            <p id="signupSubmitError" class="form-error is-hidden"></p>
-        </form>
-        <div class="auth-footer">
-            <span>Already have an account?</span>
-            <a class="inline-link section-link" href="#" data-section="login">Log In</a>
-        </div>
-    </section>
-</div>
-<div id="login" class="view-section is-hidden">
-    <section class="auth-shell">
-        <div class="auth-topbar">
-            <a class="ghost-btn section-link" href="#" data-section="index">Back Home</a>
-            <a class="ghost-btn section-link" href="#" data-section="signup">Sign Up</a>
-        </div>
-        <h2>Log In to Continue</h2>
-        <p>Access your practice portfolio, open positions, and market watchlist.</p>
-        <form id="loginForm" class="auth-form" novalidate>
-            <label for="loginUsername">Username</label>
-            <input id="loginUsername" name="username" type="text" minlength="3" maxlength="30" autocomplete="username" required>
-            <p id="loginUsernameError" class="form-error is-hidden"></p>
+                <label for="signupPassword">Password</label>
+                <input id="signupPassword" name="password" type="password" minlength="6" maxlength="128" autocomplete="new-password" required>
+                <p id="signupPasswordError" class="form-error is-hidden"></p>
 
-            <label for="loginPassword">Password</label>
-            <input id="loginPassword" name="password" type="password" minlength="6" maxlength="128" autocomplete="current-password" required>
-            <p id="loginPasswordError" class="form-error is-hidden"></p>
+                <button id="signupSubmit" type="submit" class="primary-btn">Create Account</button>
+                <p id="signupSubmitError" class="form-error is-hidden"></p>
+            </form>
+            <div class="auth-footer">
+                <span>Already have an account?</span>
+                <a class="inline-link" href="/login">Log In</a>
+            </div>
+        </section>
+    </div>
 
-            <button id="loginSubmit" type="submit" class="primary-btn">Log In</button>
-            <p id="loginSubmitError" class="form-error is-hidden"></p>
-        </form>
-        <div class="auth-footer">
-            <span>Need an account?</span>
-            <a class="inline-link section-link" href="#" data-section="signup">Sign Up</a>
-        </div>
-    </section>
-</div>
-<div id="market" class="view-section is-hidden">
-    <section class="market-shell">
-        <div class="market-toolbar">
-            <div>
-                <h2>Market Board</h2>
-                <p>Track leading names, scan momentum, and move into your trading lab with current pricing.</p>
+    <div id="login" class="view-section is-hidden">
+        <section class="auth-shell">
+            <div class="auth-intro">
+                <p class="eyebrow">Log In</p>
+                <h2>Log in to continue</h2>
+                <p>Return to your practice portfolio, open positions, watchlist, and settings page.</p>
             </div>
-            <div class="market-actions">
-                <a class="ghost-btn section-link" href="#" data-section="index">Back Home</a>
-                <a class="ghost-btn" href="/guide">Guide</a>
-                <a class="ghost-btn section-link" href="#" data-section="signup">Sign Up</a>
-                <button id="refreshMarketBtn" class="ghost-btn" type="button">Refresh</button>
-                <a class="primary-btn section-link" href="#" data-section="login">Log In</a>
+            <form id="loginForm" class="auth-form" novalidate>
+                <label for="loginUsername">Username</label>
+                <input id="loginUsername" name="username" type="text" minlength="3" maxlength="30" autocomplete="username" required>
+                <p id="loginUsernameError" class="form-error is-hidden"></p>
+
+                <label for="loginPassword">Password</label>
+                <input id="loginPassword" name="password" type="password" minlength="6" maxlength="128" autocomplete="current-password" required>
+                <p id="loginPasswordError" class="form-error is-hidden"></p>
+
+                <button id="loginSubmit" type="submit" class="primary-btn">Log In</button>
+                <p id="loginSubmitError" class="form-error is-hidden"></p>
+            </form>
+            <div class="auth-footer">
+                <span>Need an account?</span>
+                <a class="inline-link" href="/signup">Sign Up</a>
             </div>
-        </div>
-        <div class="market-summary">
-            <article class="summary-card">
-                <span class="summary-label">Coverage</span>
-                <strong id="marketCount">100 Stocks</strong>
-            </article>
-            <article class="summary-card">
-                <span class="summary-label">Session</span>
-                <strong>Real-Time Quotes</strong>
-            </article>
-            <article class="summary-card">
-                <span class="summary-label">Mode</span>
-                <strong>Practice Trading</strong>
-            </article>
-            <article class="summary-card">
-                <span class="summary-label">Last Update</span>
-                <strong id="marketUpdatedAt">Checking...</strong>
-            </article>
-            <article class="summary-card">
-                <span class="summary-label">Feed</span>
-                <strong id="marketFeedStatus">Checking...</strong>
-            </article>
-        </div>
-        <div class="market-board">
-            <div class="market-board-head">
-                <span>Symbol</span>
-                <span>Price</span>
-                <span>Change</span>
-                <span>%</span>
+        </section>
+    </div>
+
+    <div id="market" class="view-section is-hidden">
+        <section class="market-shell">
+            <div class="market-toolbar">
+                <div>
+                    <p class="eyebrow">Market Board</p>
+                    <h2>Scan the current market before you start trading.</h2>
+                    <p>Track leading names, see live movement, and move into the guide or account flow from one clear toolbar.</p>
+                </div>
+                <div class="market-actions">
+                    <button class="ghost-btn section-link" type="button" data-section="index">Back Home</button>
+                    <a class="ghost-btn" href="/guide">Guide</a>
+                    <a class="ghost-btn" href="/signup">Sign Up</a>
+                    <button id="refreshMarketBtn" class="ghost-btn" type="button">Refresh</button>
+                    <a class="primary-btn" href="/login">Log In</a>
+                </div>
             </div>
-            <div id="marketList" class="market-list">
-                <div class="market-empty">Loading market data...</div>
+            <div class="market-summary">
+                <article class="summary-card">
+                    <span class="summary-label">Coverage</span>
+                    <strong id="marketCount">100 Stocks</strong>
+                </article>
+                <article class="summary-card">
+                    <span class="summary-label">Session</span>
+                    <strong>Real-Time Quotes</strong>
+                </article>
+                <article class="summary-card">
+                    <span class="summary-label">Mode</span>
+                    <strong>Practice Trading</strong>
+                </article>
+                <article class="summary-card">
+                    <span class="summary-label">Last Update</span>
+                    <strong id="marketUpdatedAt">Checking...</strong>
+                </article>
+                <article class="summary-card">
+                    <span class="summary-label">Feed</span>
+                    <strong id="marketFeedStatus">Checking...</strong>
+                </article>
             </div>
-        </div>
-    </section>
+            <div class="market-board">
+                <div class="market-board-head">
+                    <span>Symbol</span>
+                    <span>Price</span>
+                    <span>Change</span>
+                    <span>%</span>
+                </div>
+                <div id="marketList" class="market-list">
+                    <div class="market-empty">Loading market data...</div>
+                </div>
+            </div>
+        </section>
+    </div>
 </div>
 <script>
+    const initialSection = {{ initial_section|tojson }};
+
     function showSection(sectionId) {
         const sectionIds = ['index', 'signup', 'login', 'market'];
         sectionIds.forEach((id) => {
@@ -611,15 +627,7 @@
                     setMessage(signupSubmitError, data.error || 'Could not create account.');
                     return;
                 }
-                if (loginUsername) {
-                    loginUsername.value = data.username || username;
-                }
-                if (loginPassword) {
-                    loginPassword.value = '';
-                }
-                setMessage(signupSubmitError, '');
-                setMessage(loginSubmitError, 'Account created. Log in to continue.');
-                showSection('login');
+                window.location.href = data.redirect_url || '/home';
             } catch (error) {
                 setMessage(signupSubmitError, 'Network error while creating account.');
             } finally {
@@ -662,7 +670,7 @@
                     setMessage(loginSubmitError, data.error || 'Could not log in.');
                     return;
                 }
-                window.location.href = '/home';
+                window.location.href = data.redirect_url || '/home';
             } catch (error) {
                 setMessage(loginSubmitError, 'Network error while logging in.');
             } finally {
@@ -672,7 +680,7 @@
         });
     }
 
-    startMarketPolling();
+    showSection(initialSection || 'index');
     loadMarketPrices(true);
 </script>
 </body>
