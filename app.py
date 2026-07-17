@@ -502,9 +502,7 @@ def account_delete():
     if not username:
         return jsonify({"ok": False, "error": "Not logged in."}), 401
 
-    data = request.get_json(silent=True) or {}
-    password = (data.get("password") or "").strip()
-    success, message = delete_account(username, password)
+    success, message = delete_account(username)
     if not success:
         return jsonify({"ok": False, "error": message}), 400
 

@@ -231,8 +231,6 @@
                             <p>Permanently removes the user record and all related Stockverse data.</p>
                         </div>
                         <form id="deleteForm" class="settings-form" novalidate>
-                            <label for="deletePassword">Current password</label>
-                            <input id="deletePassword" type="password" minlength="6" maxlength="128" autocomplete="current-password" required>
                             <button class="ghost-btn state-danger-btn" type="submit">Delete Account</button>
                             <p id="deleteMessage" class="form-message is-hidden"></p>
                         </form>
@@ -1094,16 +1092,14 @@
         deleteForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             const deleteMessage = document.getElementById('deleteMessage');
-            const password = document.getElementById('deletePassword').value.trim();
-            if (password.length < 6) {
-                setInfoMessage(deleteMessage, 'Current password is required.', true);
+            if (!window.confirm('Delete this account permanently? This cannot be undone.')) {
                 return;
             }
 
             const response = await fetch('/api/account/delete', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password })
+                body: JSON.stringify({})
             });
             const data = await response.json();
             if (!response.ok || !data.ok) {

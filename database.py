@@ -284,11 +284,8 @@ def reset_account(username: str, password: str) -> tuple[bool, str]:
     return reset_account_data(username)
 
 
-def delete_account(username: str, password: str) -> tuple[bool, str]:
+def delete_account(username: str) -> tuple[bool, str]:
     create_user_database()
-    if not login_user(username, password):
-        return False, "Current password is incorrect."
-
     with _connect() as connection:
         cursor = connection.cursor()
         for table_name in ("user_follows", "user_holdings", "user_trades"):
