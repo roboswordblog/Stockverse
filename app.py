@@ -39,6 +39,7 @@ from database import (
     list_users,
     login_user,
     reset_account,
+    reset_account_data,
     sell_stock,
     signup_user,
     unfollow_stock,
@@ -238,7 +239,7 @@ def home():
     username = _current_username()
     if not username:
         return redirect(url_for("login_page"))
-    return render_template('home.html', username=username)
+    return render_template('home.html', username=username, balance=get_user_money(username))
 
 
 @app.route('/profile')
@@ -246,7 +247,7 @@ def profile():
     username = _current_username()
     if not username:
         return redirect(url_for("login_page"))
-    return render_template('profile.html', username=username, balance=get_user_money(username))
+    return redirect(f"{url_for('home')}#account-settings")
 
 @app.route('/getAllPrices')
 def getAllPrices():
@@ -478,6 +479,18 @@ def account_reset():
     data = request.get_json(silent=True) or {}
     password = (data.get("password") or "").strip()
     success, message = reset_account(username, password)
+    if not success:
+        return jsonify({"ok": False, "error": message}), 400
+    return jsonify({"ok": True, "message": message, "balance": get_user_money(username)})
+
+
+@app.route('/api/account/reset-session', methods=['POST'])
+def account_reset_session():
+    username = _current_username()
+    if not username:
+        return jsonify({"ok": False, "error": "Not logged in."}), 401
+
+    success, message = reset_account_data(username)
     if not success:
         return jsonify({"ok": False, "error": message}), 400
     return jsonify({"ok": True, "message": message, "balance": get_user_money(username)})

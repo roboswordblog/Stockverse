@@ -18,7 +18,7 @@
             <nav class="sidebar-nav" aria-label="Primary">
                 <a class="nav-link is-active" href="/home">Home</a>
                 <a class="nav-link" href="/guide">Guide</a>
-                <a class="nav-link" href="/profile">Settings</a>
+                <a class="nav-link" href="#account-settings">Account Settings</a>
             </nav>
 
             <section class="sidebar-panel">
@@ -36,9 +36,7 @@
             <section class="sidebar-panel">
                 <p class="sidebar-label">Actions</p>
                 <div class="sidebar-actions">
-                    <a class="ghost-btn" href="/guide">Open Guide</a>
-                    <a class="ghost-btn" href="/profile">Account Settings</a>
-                    <button id="refreshOverview" class="ghost-btn" type="button">Refresh Data</button>
+                    <button id="resetAccountButton" class="ghost-btn" type="button">Reset Account</button>
                     <button id="logoutButton" class="ghost-btn state-danger-btn" type="button">Log Out</button>
                 </div>
             </section>
@@ -175,6 +173,84 @@
                 </div>
                 <p id="leaderboardFootnote" class="info-message is-hidden"></p>
             </section>
+
+            <section id="account-settings" class="panel account-settings-panel">
+                <div class="panel-head">
+                    <div>
+                        <p class="eyebrow">Account Settings</p>
+                        <h2>Manage your account</h2>
+                        <p>Change login details, reset the simulation, or delete the account without leaving the home page.</p>
+                    </div>
+                    <div class="account-summary">
+                        <div class="sidebar-stat state-positive">
+                            <span>Username</span>
+                            <strong id="profileUsernameHeading">{{ username }}</strong>
+                        </div>
+                        <div class="sidebar-stat state-caution">
+                            <span>Balance</span>
+                            <strong id="profileBalance">{{ "$%.2f"|format(balance or 0) }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-grid">
+                    <section class="settings-card state-positive-soft">
+                        <div class="card-head">
+                            <h3>Change Username</h3>
+                            <p>Updates your account name everywhere in Stockverse.</p>
+                        </div>
+                        <form id="usernameForm" class="settings-form" novalidate>
+                            <label for="newUsername">New username</label>
+                            <input id="newUsername" type="text" minlength="3" maxlength="30" autocomplete="username" required>
+                            <label for="usernamePassword">Current password</label>
+                            <input id="usernamePassword" type="password" minlength="6" maxlength="128" autocomplete="current-password" required>
+                            <button class="primary-btn" type="submit">Update Username</button>
+                            <p id="usernameMessage" class="form-message is-hidden"></p>
+                        </form>
+                    </section>
+
+                    <section class="settings-card state-caution-soft">
+                        <div class="card-head">
+                            <h3>Change Password</h3>
+                            <p>Use your current password once, then save the new password for future sign-ins.</p>
+                        </div>
+                        <form id="passwordForm" class="settings-form" novalidate>
+                            <label for="currentPassword">Current password</label>
+                            <input id="currentPassword" type="password" minlength="6" maxlength="128" autocomplete="current-password" required>
+                            <label for="newPassword">New password</label>
+                            <input id="newPassword" type="password" minlength="6" maxlength="128" autocomplete="new-password" required>
+                            <button class="primary-btn" type="submit">Update Password</button>
+                            <p id="passwordMessage" class="form-message is-hidden"></p>
+                        </form>
+                    </section>
+
+                    <section class="settings-card state-caution-soft">
+                        <div class="card-head">
+                            <h3>Reset Account</h3>
+                            <p>Removes all owned stocks, followed stocks, and trade history, then restores the starting balance.</p>
+                        </div>
+                        <form id="resetForm" class="settings-form" novalidate>
+                            <label for="resetPassword">Current password</label>
+                            <input id="resetPassword" type="password" minlength="6" maxlength="128" autocomplete="current-password" required>
+                            <button class="ghost-btn caution-btn" type="submit">Reset Account</button>
+                            <p id="resetMessage" class="form-message is-hidden"></p>
+                        </form>
+                    </section>
+
+                    <section class="settings-card state-danger-soft">
+                        <div class="card-head">
+                            <h3>Delete Account</h3>
+                            <p>Permanently removes the user record and all related Stockverse data.</p>
+                        </div>
+                        <form id="deleteForm" class="settings-form" novalidate>
+                            <label for="deletePassword">Current password</label>
+                            <input id="deletePassword" type="password" minlength="6" maxlength="128" autocomplete="current-password" required>
+                            <button class="ghost-btn state-danger-btn" type="submit">Delete Account</button>
+                            <p id="deleteMessage" class="form-message is-hidden"></p>
+                        </form>
+                    </section>
+                </div>
+            </section>
         </main>
     </div>
 </div>
@@ -296,8 +372,11 @@
     const stockSection = document.getElementById('stock');
     const accountBalance = document.getElementById('accountBalance');
     const marketUpdateStatus = document.getElementById('marketUpdateStatus');
-    const refreshOverview = document.getElementById('refreshOverview');
+    const resetAccountButton = document.getElementById('resetAccountButton');
     const logoutButton = document.getElementById('logoutButton');
+    const welcomeName = document.getElementById('welcomeName');
+    const profileUsernameHeading = document.getElementById('profileUsernameHeading');
+    const profileBalance = document.getElementById('profileBalance');
     const topStocksList = document.getElementById('topStocksList');
     const followedStocksList = document.getElementById('followedStocksList');
     const holdingsList = document.getElementById('holdingsList');
@@ -324,6 +403,10 @@
     const positionAveragePrice = document.getElementById('positionAveragePrice');
     const positionMarketValue = document.getElementById('positionMarketValue');
     const positionUnrealized = document.getElementById('positionUnrealized');
+    const usernameForm = document.getElementById('usernameForm');
+    const passwordForm = document.getElementById('passwordForm');
+    const resetForm = document.getElementById('resetForm');
+    const deleteForm = document.getElementById('deleteForm');
 
     let overviewState = { top_stocks: [], followed_stocks: [], holdings: [], balance: 0, leaderboard: { leaders: [], current_user: null } };
     let currentStock = null;
@@ -350,6 +433,20 @@
         const number = Number(value) || 0;
         const prefix = number > 0 ? '+' : '';
         return `${prefix}${formatMoney(number)}`;
+    }
+
+    function syncAccountIdentity(username, balance) {
+        if (typeof username === 'string' && username.trim()) {
+            if (welcomeName) {
+                welcomeName.textContent = username;
+            }
+            if (profileUsernameHeading) {
+                profileUsernameHeading.textContent = username;
+            }
+        }
+        if (profileBalance && balance !== undefined) {
+            profileBalance.textContent = formatMoney(balance);
+        }
     }
 
     function formatUpdatedLabel(unixSeconds) {
@@ -597,10 +694,7 @@
         ctx.lineTo(width, height);
         ctx.lineTo(0, height);
         ctx.closePath();
-        const gradient = ctx.createLinearGradient(0, 0, 0, height);
-        gradient.addColorStop(0, trendIsPositive ? 'rgba(46, 242, 111, 0.22)' : 'rgba(209, 130, 130, 0.18)');
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = gradient;
+        ctx.fillStyle = trendIsPositive ? 'rgba(46, 242, 111, 0.10)' : 'rgba(209, 130, 130, 0.10)';
         ctx.fill();
     }
 
@@ -697,6 +791,7 @@
 
         overviewState = data;
         accountBalance.textContent = formatMoney(data.balance);
+        syncAccountIdentity(data.username, data.balance);
         if (marketUpdateStatus) {
             marketUpdateStatus.textContent = `${formatUpdatedLabel(data.updated_at)} • ${formatFeedStatus(data.market_status)}`;
         }
@@ -705,6 +800,30 @@
         renderHoldings(data.holdings || []);
         renderLeaderboard(data.leaderboard);
         bindStockLinks();
+    }
+
+    async function resetAccountFromHome() {
+        const confirmed = window.confirm('Reset account and remove all followed stocks, holdings, and trade history?');
+        if (!confirmed) {
+            return;
+        }
+
+        const response = await fetch('/api/account/reset-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+            alert(data.error || 'Unable to reset account.');
+            return;
+        }
+
+        syncAccountIdentity(overviewState.username, data.balance);
+        await loadOverview();
+        if (!stockSection.classList.contains('is-hidden')) {
+            showHome();
+        }
+        alert(data.message || 'Account reset.');
     }
 
     async function toggleFollow(symbol) {
@@ -746,6 +865,7 @@
         document.getElementById('detailPreviousClose').textContent = formatMoney(data.stock.previous_close);
         detailFollowButton.textContent = data.stock.followed ? 'Unfollow' : 'Follow';
         accountBalance.textContent = formatMoney(data.balance);
+        syncAccountIdentity(overviewState.username, data.balance);
         stockChartSubtle.textContent = `${formatUpdatedLabel((data.market_status || {}).last_refresh)} • ${formatFeedStatus(data.market_status)}`;
         renderPosition(data.position);
         buyMessage.classList.add('is-hidden');
@@ -881,14 +1001,128 @@
     });
 
     backToHome.addEventListener('click', showHome);
-    if (refreshOverview) {
-        refreshOverview.addEventListener('click', () => loadOverview());
+    if (resetAccountButton) {
+        resetAccountButton.addEventListener('click', resetAccountFromHome);
     }
     if (logoutButton) {
         logoutButton.addEventListener('click', async () => {
             const response = await fetch('/logout', { method: 'POST' });
             const data = await response.json();
             window.location.href = (data && data.redirect_url) || '/';
+        });
+    }
+    if (usernameForm) {
+        usernameForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const usernameMessage = document.getElementById('usernameMessage');
+            const newUsername = document.getElementById('newUsername').value.trim();
+            const password = document.getElementById('usernamePassword').value.trim();
+            if (newUsername.length < 3) {
+                setInfoMessage(usernameMessage, 'Username must be at least 3 characters.', true);
+                return;
+            }
+            if (password.length < 6) {
+                setInfoMessage(usernameMessage, 'Current password is required.', true);
+                return;
+            }
+
+            const response = await fetch('/api/account/username', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ new_username: newUsername, password })
+            });
+            const data = await response.json();
+            if (!response.ok || !data.ok) {
+                setInfoMessage(usernameMessage, data.error || 'Unable to update username.', true);
+                return;
+            }
+
+            overviewState.username = data.username;
+            syncAccountIdentity(data.username, overviewState.balance);
+            document.getElementById('newUsername').value = '';
+            document.getElementById('usernamePassword').value = '';
+            setInfoMessage(usernameMessage, data.message || 'Username updated.');
+        });
+    }
+    if (passwordForm) {
+        passwordForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const passwordMessage = document.getElementById('passwordMessage');
+            const currentPassword = document.getElementById('currentPassword').value.trim();
+            const newPassword = document.getElementById('newPassword').value.trim();
+            if (currentPassword.length < 6 || newPassword.length < 6) {
+                setInfoMessage(passwordMessage, 'Both passwords must be at least 6 characters.', true);
+                return;
+            }
+
+            const response = await fetch('/api/account/password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ current_password: currentPassword, new_password: newPassword })
+            });
+            const data = await response.json();
+            if (!response.ok || !data.ok) {
+                setInfoMessage(passwordMessage, data.error || 'Unable to update password.', true);
+                return;
+            }
+
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            setInfoMessage(passwordMessage, data.message || 'Password updated.');
+        });
+    }
+    if (resetForm) {
+        resetForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const resetMessage = document.getElementById('resetMessage');
+            const password = document.getElementById('resetPassword').value.trim();
+            if (password.length < 6) {
+                setInfoMessage(resetMessage, 'Current password is required.', true);
+                return;
+            }
+
+            const response = await fetch('/api/account/reset', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
+            const data = await response.json();
+            if (!response.ok || !data.ok) {
+                setInfoMessage(resetMessage, data.error || 'Unable to reset account.', true);
+                return;
+            }
+
+            document.getElementById('resetPassword').value = '';
+            syncAccountIdentity(overviewState.username, data.balance);
+            await loadOverview();
+            if (!stockSection.classList.contains('is-hidden')) {
+                showHome();
+            }
+            setInfoMessage(resetMessage, data.message || 'Account reset.');
+        });
+    }
+    if (deleteForm) {
+        deleteForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const deleteMessage = document.getElementById('deleteMessage');
+            const password = document.getElementById('deletePassword').value.trim();
+            if (password.length < 6) {
+                setInfoMessage(deleteMessage, 'Current password is required.', true);
+                return;
+            }
+
+            const response = await fetch('/api/account/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
+            const data = await response.json();
+            if (!response.ok || !data.ok) {
+                setInfoMessage(deleteMessage, data.error || 'Unable to delete account.', true);
+                return;
+            }
+
+            window.location.href = data.redirect_url || '/';
         });
     }
     if (historyRangeSwitch) {

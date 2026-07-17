@@ -259,11 +259,8 @@ def change_password(username: str, current_password: str, new_password: str) -> 
     return True, "Password updated successfully."
 
 
-def reset_account(username: str, password: str) -> tuple[bool, str]:
+def reset_account_data(username: str) -> tuple[bool, str]:
     create_user_database()
-    if not login_user(username, password):
-        return False, "Current password is incorrect."
-
     with _connect() as connection:
         cursor = connection.cursor()
         for table_name in ("user_follows", "user_holdings", "user_trades"):
@@ -277,6 +274,14 @@ def reset_account(username: str, password: str) -> tuple[bool, str]:
             return False, "User not found."
         connection.commit()
     return True, "Account reset successfully."
+
+
+def reset_account(username: str, password: str) -> tuple[bool, str]:
+    create_user_database()
+    if not login_user(username, password):
+        return False, "Current password is incorrect."
+
+    return reset_account_data(username)
 
 
 def delete_account(username: str, password: str) -> tuple[bool, str]:
