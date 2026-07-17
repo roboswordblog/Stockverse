@@ -21,14 +21,6 @@
                 <a class="nav-link" href="/guide">Guide</a>
             </nav>
 
-            <section class="sidebar-panel">
-                <p class="sidebar-label">Actions</p>
-                <div class="sidebar-actions">
-                    <button id="resetAccountButton" class="ghost-btn" type="button">Reset Account</button>
-                    <button id="logoutButton" class="ghost-btn state-danger-btn" type="button">Log Out</button>
-                </div>
-            </section>
-
             <section class="sidebar-panel learning-panel">
                 <p class="sidebar-label">Learning</p>
                 <p class="sidebar-copy">Use the guide before placing larger practice positions or testing a new symbol.</p>
@@ -186,6 +178,7 @@
                             <strong id="profileBalance">{{ "$%.2f"|format(balance or 0) }}</strong>
                         </div>
                     </div>
+                    <button id="logoutButton" class="ghost-btn state-danger-btn" type="button">Log Out</button>
                 </div>
 
                 <div class="settings-grid">
@@ -370,7 +363,6 @@
     const accountSettingsView = document.getElementById('account-settings-view');
     const accountBalance = document.getElementById('accountBalance');
     const marketUpdateStatus = document.getElementById('marketUpdateStatus');
-    const resetAccountButton = document.getElementById('resetAccountButton');
     const logoutButton = document.getElementById('logoutButton');
     const welcomeName = document.getElementById('welcomeName');
     const profileUsernameHeading = document.getElementById('profileUsernameHeading');
@@ -821,30 +813,6 @@
         bindStockLinks();
     }
 
-    async function resetAccountFromHome() {
-        const confirmed = window.confirm('Reset account and remove all followed stocks, holdings, and trade history?');
-        if (!confirmed) {
-            return;
-        }
-
-        const response = await fetch('/api/account/reset-session', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        });
-        const data = await response.json();
-        if (!response.ok || !data.ok) {
-            alert(data.error || 'Unable to reset account.');
-            return;
-        }
-
-        syncAccountIdentity(overviewState.username, data.balance);
-        await loadOverview();
-        if (!stockSection.classList.contains('is-hidden')) {
-            showHome();
-        }
-        alert(data.message || 'Account reset.');
-    }
-
     async function toggleFollow(symbol) {
         const isFollowed = (overviewState.followed_stocks || []).some((stock) => stock.symbol === symbol);
         const response = await fetch('/api/follow', {
@@ -1020,9 +988,6 @@
     });
 
     backToHome.addEventListener('click', showHome);
-    if (resetAccountButton) {
-        resetAccountButton.addEventListener('click', resetAccountFromHome);
-    }
     if (logoutButton) {
         logoutButton.addEventListener('click', async () => {
             const response = await fetch('/logout', { method: 'POST' });
