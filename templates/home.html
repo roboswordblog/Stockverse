@@ -8,157 +8,175 @@
 </head>
 <body>
 <div id="home" class="home-shell">
-    <header class="dashboard-topbar">
-        <div class="dashboard-brand">
-            <a class="brand-link" href="/home">Stockverse</a>
-            <p>Trading Lab</p>
-        </div>
-        <nav class="dashboard-nav" aria-label="Primary">
-            <a class="nav-link is-active" href="/home">Home</a>
-            <a class="nav-link" href="/guide">Guide</a>
-            <a class="nav-link" href="/profile">Settings</a>
-        </nav>
-        <div class="topbar-actions">
-            <button id="refreshOverview" class="ghost-btn" type="button">Refresh</button>
-            <button id="logoutButton" class="ghost-btn" type="button">Log Out</button>
-        </div>
-    </header>
-
-    <section class="home-header">
-        <div class="home-header-copy">
-            <p class="eyebrow">Stockverse Dashboard</p>
-            <h1>Welcome back, <span id="welcomeName">{{ username }}</span>.</h1>
-            <p class="subtle">Track the market, review your holdings, and move into the guide or account settings without leaving the dashboard.</p>
-        </div>
-        <div class="home-header-tools">
-            <div class="header-stock-search">
-                <input id="topStockSearchInput" type="text" placeholder="Search stocks">
-                <button id="topStockSearchGo" class="primary-btn" type="button">Search</button>
+    <div class="dashboard-layout">
+        <aside class="dashboard-sidebar">
+            <div class="sidebar-brand-block">
+                <a class="brand-link" href="/home">Stockverse</a>
+                <p class="sidebar-copy">Trading lab</p>
             </div>
-            <div class="header-summary-grid">
-                <div class="balance-card">
+
+            <nav class="sidebar-nav" aria-label="Primary">
+                <a class="nav-link is-active" href="/home">Home</a>
+                <a class="nav-link" href="/guide">Guide</a>
+                <a class="nav-link" href="/profile">Settings</a>
+            </nav>
+
+            <section class="sidebar-panel">
+                <p class="sidebar-label">Account</p>
+                <div class="sidebar-stat state-positive">
                     <span>Balance</span>
                     <strong id="accountBalance">Loading...</strong>
                 </div>
-                <div class="balance-card">
+                <div class="sidebar-stat state-caution">
                     <span>Market Update</span>
                     <strong id="marketUpdateStatus">Checking...</strong>
                 </div>
-            </div>
-        </div>
-    </section>
+            </section>
 
-    <main class="dashboard-grid">
-        <section class="panel top-stocks-panel">
-            <div class="panel-head">
-                <div>
-                    <h2>Top 10 Stocks</h2>
-                    <p>Click a symbol to open the stock page.</p>
+            <section class="sidebar-panel">
+                <p class="sidebar-label">Actions</p>
+                <div class="sidebar-actions">
+                    <a class="ghost-btn" href="/guide">Open Guide</a>
+                    <a class="ghost-btn" href="/profile">Account Settings</a>
+                    <button id="refreshOverview" class="ghost-btn" type="button">Refresh Data</button>
+                    <button id="logoutButton" class="ghost-btn state-danger-btn" type="button">Log Out</button>
                 </div>
-            </div>
-            <div class="stock-table stock-table-head">
-                <span>Stock</span>
-                <span>Price</span>
-                <span>Change</span>
-                <span>Action</span>
-            </div>
-            <div id="topStocksList" class="stock-table-body">
-                <div class="panel-empty">Loading top stocks...</div>
-            </div>
-        </section>
+            </section>
 
-        <section class="panel followed-panel">
-            <div class="panel-head">
-                <div>
-                    <h2>Followed Stocks</h2>
-                    <p>Your tracked symbols appear here.</p>
+            <section class="sidebar-panel learning-panel">
+                <p class="sidebar-label">Learning</p>
+                <p class="sidebar-copy">Use the guide before placing larger practice positions or testing a new symbol.</p>
+                <div class="learning-grid">
+                    <article class="detail-stat-card state-positive-soft">
+                        <span>Best For</span>
+                        <strong>First trades</strong>
+                    </article>
+                    <article class="detail-stat-card state-caution-soft">
+                        <span>Covers</span>
+                        <strong>Risk and sizing</strong>
+                    </article>
+                    <article class="detail-stat-card state-danger-soft">
+                        <span>Reminder</span>
+                        <strong>Process first</strong>
+                    </article>
                 </div>
-            </div>
-            <div id="followedStocksList" class="followed-list">
-                <div class="panel-empty">No followed stocks yet.</div>
-            </div>
-        </section>
-    </main>
+            </section>
+        </aside>
 
-    <section class="panel learning-panel">
-        <div class="panel-head">
-            <div>
-                <h2>Learning Hub</h2>
-                <p>Use the guide before you take bigger practice positions or try a new stock.</p>
-            </div>
-            <a class="primary-btn" href="/guide">Open Guide</a>
-        </div>
-        <div class="learning-grid">
-            <article class="detail-stat-card">
-                <span>Best For</span>
-                <strong>First trades</strong>
-            </article>
-            <article class="detail-stat-card">
-                <span>Covers</span>
-                <strong>Quotes, sizing, risk</strong>
-            </article>
-            <article class="detail-stat-card">
-                <span>Format</span>
-                <strong>Step walkthrough + quiz</strong>
-            </article>
-        </div>
-    </section>
+        <main class="dashboard-main">
+            <section class="home-header">
+                <div class="home-header-copy">
+                    <p class="eyebrow">Dashboard</p>
+                    <h1>Welcome back, <span id="welcomeName">{{ username }}</span>.</h1>
+                    <p class="subtle">Track the market, review your positions, and move between trading, learning, and account settings without losing context.</p>
+                </div>
+                <div class="home-header-tools">
+                    <div class="header-stock-search">
+                        <input id="topStockSearchInput" type="text" placeholder="Search stocks">
+                        <button id="topStockSearchGo" class="primary-btn" type="button">Search</button>
+                    </div>
+                    <div class="header-notes">
+                        <div class="header-note state-positive-soft">
+                            <span>Active Session</span>
+                            <strong>Practice portfolio</strong>
+                        </div>
+                        <div class="header-note state-caution-soft">
+                            <span>Workflow</span>
+                            <strong>Guide, scan, trade</strong>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-    <section class="panel leaderboard-panel">
-        <div class="panel-head">
-            <div>
-                <h2>Leaderboard</h2>
-                <p>Top portfolios ranked by current account value.</p>
-            </div>
-        </div>
-        <div class="leaderboard-head">
-            <span>Rank</span>
-            <span>Trader</span>
-            <span>Cash</span>
-            <span>Total Value</span>
-            <span>Return</span>
-            <span>Open Positions</span>
-        </div>
-        <div id="leaderboardList" class="leaderboard-list">
-            <div class="panel-empty">Loading leaderboard...</div>
-        </div>
-        <p id="leaderboardFootnote" class="info-message is-hidden"></p>
-    </section>
+            <section class="dashboard-grid">
+                <section class="panel top-stocks-panel">
+                    <div class="panel-head">
+                        <div>
+                            <h2>Top 10 Stocks</h2>
+                            <p>Click a symbol to open the stock page.</p>
+                        </div>
+                    </div>
+                    <div class="stock-table stock-table-head">
+                        <span>Stock</span>
+                        <span>Price</span>
+                        <span>Change</span>
+                        <span>Action</span>
+                    </div>
+                    <div id="topStocksList" class="stock-table-body">
+                        <div class="panel-empty">Loading top stocks...</div>
+                    </div>
+                </section>
 
-    <section id="searchPanel" class="panel search-panel">
-        <div class="panel-head">
-            <div>
-                <h2>Search Stocks</h2>
-                <p>Search for more symbols beyond the top 10.</p>
-            </div>
-        </div>
-        <div class="search-bar">
-            <input id="stockSearchInput" type="text" placeholder="Search by symbol or company name">
-        </div>
-        <div id="searchResults" class="search-results">
-            <div class="panel-empty">Type to search for stocks.</div>
-        </div>
-    </section>
+                <section class="panel followed-panel">
+                    <div class="panel-head">
+                        <div>
+                            <h2>Followed Stocks</h2>
+                            <p>Your tracked symbols appear here.</p>
+                        </div>
+                    </div>
+                    <div id="followedStocksList" class="followed-list">
+                        <div class="panel-empty">No followed stocks yet.</div>
+                    </div>
+                </section>
+            </section>
 
-    <section class="panel holdings-panel">
-        <div class="panel-head">
-            <div>
-                <h2>Bought Stocks</h2>
-                <p>Your active positions with quick sell controls.</p>
-            </div>
-        </div>
-        <div class="holdings-head">
-            <span>Stock</span>
-            <span>Shares</span>
-            <span>Avg Buy</span>
-            <span>Current</span>
-            <span>P/L</span>
-            <span>Action</span>
-        </div>
-        <div id="holdingsList" class="holdings-list">
-            <div class="panel-empty">No bought stocks yet.</div>
-        </div>
-    </section>
+            <section class="panel holdings-panel">
+                <div class="panel-head">
+                    <div>
+                        <h2>Bought Stocks</h2>
+                        <p>Your active positions with quick sell controls.</p>
+                    </div>
+                </div>
+                <div class="holdings-head">
+                    <span>Stock</span>
+                    <span>Shares</span>
+                    <span>Avg Buy</span>
+                    <span>Current</span>
+                    <span>P/L</span>
+                    <span>Action</span>
+                </div>
+                <div id="holdingsList" class="holdings-list">
+                    <div class="panel-empty">No bought stocks yet.</div>
+                </div>
+            </section>
+
+            <section id="searchPanel" class="panel search-panel">
+                <div class="panel-head">
+                    <div>
+                        <h2>Search Stocks</h2>
+                        <p>Search for more symbols beyond the top 10.</p>
+                    </div>
+                </div>
+                <div class="search-bar">
+                    <input id="stockSearchInput" type="text" placeholder="Search by symbol or company name">
+                </div>
+                <div id="searchResults" class="search-results">
+                    <div class="panel-empty">Type to search for stocks.</div>
+                </div>
+            </section>
+
+            <section class="panel leaderboard-panel">
+                <div class="panel-head">
+                    <div>
+                        <h2>Leaderboard</h2>
+                        <p>Top portfolios ranked by current account value.</p>
+                    </div>
+                </div>
+                <div class="leaderboard-head">
+                    <span>Rank</span>
+                    <span>Trader</span>
+                    <span>Cash</span>
+                    <span>Total Value</span>
+                    <span>Return</span>
+                    <span>Open Positions</span>
+                </div>
+                <div id="leaderboardList" class="leaderboard-list">
+                    <div class="panel-empty">Loading leaderboard...</div>
+                </div>
+                <p id="leaderboardFootnote" class="info-message is-hidden"></p>
+            </section>
+        </main>
+    </div>
 </div>
 
 <div id="stock" class="stock-shell is-hidden">
