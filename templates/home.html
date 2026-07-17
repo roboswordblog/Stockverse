@@ -16,9 +16,9 @@
             </div>
 
             <nav class="sidebar-nav" aria-label="Primary">
-                <a class="nav-link is-active" href="/home">Home</a>
+                <button class="nav-link is-active" type="button" data-home-view="dashboard">Home</button>
+                <button class="nav-link" type="button" data-home-view="account-settings">Account Settings</button>
                 <a class="nav-link" href="/guide">Guide</a>
-                <a class="nav-link" href="#account-settings">Account Settings</a>
             </nav>
 
             <section class="sidebar-panel">
@@ -50,6 +50,7 @@
         </aside>
 
         <main class="dashboard-main">
+            <section id="dashboard-view" class="home-view">
             <section class="home-header">
                 <div class="home-header-copy">
                     <p class="eyebrow">Dashboard</p>
@@ -165,7 +166,9 @@
                 </div>
                 <p id="leaderboardFootnote" class="info-message is-hidden"></p>
             </section>
+            </section>
 
+            <section id="account-settings-view" class="home-view is-hidden">
             <section id="account-settings" class="panel account-settings-panel">
                 <div class="panel-head">
                     <div>
@@ -242,6 +245,7 @@
                         </form>
                     </section>
                 </div>
+            </section>
             </section>
         </main>
     </div>
@@ -362,6 +366,8 @@
 <script>
     const homeSection = document.getElementById('home');
     const stockSection = document.getElementById('stock');
+    const dashboardView = document.getElementById('dashboard-view');
+    const accountSettingsView = document.getElementById('account-settings-view');
     const accountBalance = document.getElementById('accountBalance');
     const marketUpdateStatus = document.getElementById('marketUpdateStatus');
     const resetAccountButton = document.getElementById('resetAccountButton');
@@ -399,11 +405,13 @@
     const passwordForm = document.getElementById('passwordForm');
     const resetForm = document.getElementById('resetForm');
     const deleteForm = document.getElementById('deleteForm');
+    const homeViewButtons = document.querySelectorAll('[data-home-view]');
 
     let overviewState = { top_stocks: [], followed_stocks: [], holdings: [], balance: 0, leaderboard: { leaders: [], current_user: null } };
     let currentStock = null;
     let currentHistory = [];
     let currentHistoryRange = '1D';
+    let activeHomeView = 'dashboard';
     let overviewPoller = null;
     let stockDetailPoller = null;
     let searchPoller = null;
@@ -468,6 +476,24 @@
         return 'Cache';
     }
 
+    function showHomeView(viewName = 'dashboard') {
+        activeHomeView = viewName === 'account-settings' ? 'account-settings' : 'dashboard';
+        if (dashboardView) {
+            dashboardView.classList.toggle('is-hidden', activeHomeView !== 'dashboard');
+        }
+        if (accountSettingsView) {
+            accountSettingsView.classList.toggle('is-hidden', activeHomeView !== 'account-settings');
+        }
+        homeViewButtons.forEach((button) => {
+            button.classList.toggle('is-active', button.dataset.homeView === activeHomeView);
+        });
+        if (activeHomeView === 'account-settings') {
+            history.replaceState(null, '', '#account-settings');
+        } else if (window.location.hash === '#account-settings') {
+            history.replaceState(null, '', window.location.pathname);
+        }
+    }
+
     function showHome() {
         if (stockDetailPoller) {
             clearInterval(stockDetailPoller);
@@ -475,6 +501,7 @@
         }
         stockSection.classList.add('is-hidden');
         homeSection.classList.remove('is-hidden');
+        showHomeView(activeHomeView);
     }
 
     function showStock() {
@@ -1003,6 +1030,11 @@
             window.location.href = (data && data.redirect_url) || '/';
         });
     }
+    homeViewButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            showHomeView(button.dataset.homeView || 'dashboard');
+        });
+    });
     if (usernameForm) {
         usernameForm.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -1167,6 +1199,7 @@
         overviewPoller = setInterval(loadOverview, 15000);
     }
 
+    showHomeView(window.location.hash === '#account-settings' ? 'account-settings' : 'dashboard');
     startOverviewPolling();
     loadOverview();
 </script>

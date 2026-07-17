@@ -52,6 +52,11 @@ body {
     gap: 18px;
 }
 
+.home-view {
+    display: grid;
+    gap: 18px;
+}
+
 .dashboard-sidebar,
 .home-header,
 .stock-header,
